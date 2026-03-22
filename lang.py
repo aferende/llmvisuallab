@@ -22,10 +22,10 @@ TRANSLATIONS = {
         "sidebar_github": "⭐ GitHub Repository",
         "sidebar_credits_title": "🛠️ Built with",
         "sidebar_credits_text": (
-            "• [Streamlit](https://streamlit.io) — web app framework\n"
-            "• [NumPy](https://numpy.org) — neural network math\n"
-            "• [Plotly](https://plotly.com) — interactive charts\n"
-            "• [Claude Code](https://claude.ai/claude-code) — AI-assisted development"
+            "- [Streamlit](https://streamlit.io) — web app framework\n"
+            "- [NumPy](https://numpy.org) — neural network math\n"
+            "- [Plotly](https://plotly.com) — interactive charts\n"
+            "- [Claude Code](https://claude.ai/claude-code) — AI-assisted development"
         ),
 
         # ---- Header ----
@@ -267,10 +267,10 @@ TRANSLATIONS = {
         "sidebar_github": "⭐ Repository GitHub",
         "sidebar_credits_title": "🛠️ Costruito con",
         "sidebar_credits_text": (
-            "• [Streamlit](https://streamlit.io) — framework web app\n"
-            "• [NumPy](https://numpy.org) — calcoli della rete neurale\n"
-            "• [Plotly](https://plotly.com) — grafici interattivi\n"
-            "• [Claude Code](https://claude.ai/claude-code) — sviluppo assistito da AI"
+            "- [Streamlit](https://streamlit.io) — framework web app\n"
+            "- [NumPy](https://numpy.org) — calcoli della rete neurale\n"
+            "- [Plotly](https://plotly.com) — grafici interattivi\n"
+            "- [Claude Code](https://claude.ai/claude-code) — sviluppo assistito da AI"
         ),
 
         # ---- Header ----
@@ -512,10 +512,10 @@ TRANSLATIONS = {
         "sidebar_github": "⭐ Dépôt GitHub",
         "sidebar_credits_title": "🛠️ Construit avec",
         "sidebar_credits_text": (
-            "• [Streamlit](https://streamlit.io) — framework web\n"
-            "• [NumPy](https://numpy.org) — calculs du réseau neuronal\n"
-            "• [Plotly](https://plotly.com) — graphiques interactifs\n"
-            "• [Claude Code](https://claude.ai/claude-code) — développement assisté par IA"
+            "- [Streamlit](https://streamlit.io) — framework web\n"
+            "- [NumPy](https://numpy.org) — calculs du réseau neuronal\n"
+            "- [Plotly](https://plotly.com) — graphiques interactifs\n"
+            "- [Claude Code](https://claude.ai/claude-code) — développement assisté par IA"
         ),
         "app_title": "LLM Visual Lab",
         "app_subtitle": "Découvrez le fonctionnement de l'Intelligence Artificielle",
@@ -686,10 +686,10 @@ TRANSLATIONS = {
         "sidebar_github": "⭐ GitHub-Repository",
         "sidebar_credits_title": "🛠️ Erstellt mit",
         "sidebar_credits_text": (
-            "• [Streamlit](https://streamlit.io) — Web-App-Framework\n"
-            "• [NumPy](https://numpy.org) — neuronale Netzwerkberechnungen\n"
-            "• [Plotly](https://plotly.com) — interaktive Diagramme\n"
-            "• [Claude Code](https://claude.ai/claude-code) — KI-unterstützte Entwicklung"
+            "- [Streamlit](https://streamlit.io) — Web-App-Framework\n"
+            "- [NumPy](https://numpy.org) — neuronale Netzwerkberechnungen\n"
+            "- [Plotly](https://plotly.com) — interaktive Diagramme\n"
+            "- [Claude Code](https://claude.ai/claude-code) — KI-unterstützte Entwicklung"
         ),
         "app_title": "LLM Visual Lab",
         "app_subtitle": "Entdecken Sie, wie Künstliche Intelligenz funktioniert",
@@ -855,10 +855,10 @@ TRANSLATIONS = {
         "sidebar_github": "⭐ Repositorio GitHub",
         "sidebar_credits_title": "🛠️ Construido con",
         "sidebar_credits_text": (
-            "• [Streamlit](https://streamlit.io) — framework web\n"
-            "• [NumPy](https://numpy.org) — cálculos de red neuronal\n"
-            "• [Plotly](https://plotly.com) — gráficos interactivos\n"
-            "• [Claude Code](https://claude.ai/claude-code) — desarrollo asistido por IA"
+            "- [Streamlit](https://streamlit.io) — framework web\n"
+            "- [NumPy](https://numpy.org) — cálculos de red neuronal\n"
+            "- [Plotly](https://plotly.com) — gráficos interactivos\n"
+            "- [Claude Code](https://claude.ai/claude-code) — desarrollo asistido por IA"
         ),
         "app_title": "LLM Visual Lab",
         "app_subtitle": "Descubre cómo funciona la Inteligencia Artificial",
@@ -1024,10 +1024,10 @@ TRANSLATIONS = {
         "sidebar_github": "⭐ GitHub 仓库",
         "sidebar_credits_title": "🛠️ 构建工具",
         "sidebar_credits_text": (
-            "• [Streamlit](https://streamlit.io) — Web 应用框架\n"
-            "• [NumPy](https://numpy.org) — 神经网络计算\n"
-            "• [Plotly](https://plotly.com) — 交互式图表\n"
-            "• [Claude Code](https://claude.ai/claude-code) — AI 辅助开发"
+            "- [Streamlit](https://streamlit.io) — Web 应用框架\n"
+            "- [NumPy](https://numpy.org) — 神经网络计算\n"
+            "- [Plotly](https://plotly.com) — 交互式图表\n"
+            "- [Claude Code](https://claude.ai/claude-code) — AI 辅助开发"
         ),
         "app_title": "LLM Visual Lab",
         "app_subtitle": "探索人工智能的工作原理",
@@ -1186,10 +1186,10 @@ TRANSLATIONS = {
         "sidebar_github": "⭐ Репозиторий GitHub",
         "sidebar_credits_title": "🛠️ Создано с помощью",
         "sidebar_credits_text": (
-            "• [Streamlit](https://streamlit.io) — фреймворк для веб-приложений\n"
-            "• [NumPy](https://numpy.org) — вычисления нейронной сети\n"
-            "• [Plotly](https://plotly.com) — интерактивные графики\n"
-            "• [Claude Code](https://claude.ai/claude-code) — разработка с помощью ИИ"
+            "- [Streamlit](https://streamlit.io) — фреймворк для веб-приложений\n"
+            "- [NumPy](https://numpy.org) — вычисления нейронной сети\n"
+            "- [Plotly](https://plotly.com) — интерактивные графики\n"
+            "- [Claude Code](https://claude.ai/claude-code) — разработка с помощью ИИ"
         ),
         "app_title": "LLM Visual Lab",
         "app_subtitle": "Откройте для себя, как работает Искусственный Интеллект",

@@ -63,8 +63,16 @@ def plot_3d_network(
     embed_dim = model.embed_dim
     hidden_size = model.hidden_size
 
-    # Cap displayed vocab to avoid visual clutter
-    max_vocab_display = min(vocab_size, 14)
+    # Special token indices to exclude from visualisation (PAD, UNK)
+    special_idxs = {
+        tokenizer.vocab.get(tokenizer.PAD, -1),
+        tokenizer.vocab.get(tokenizer.UNK, -2),
+    }
+
+    # Input layer: show real vocabulary tokens only (no PAD/UNK), cap at 14
+    real_vocab_idxs = [i for i in range(vocab_size) if i not in special_idxs]
+    max_vocab_display = min(len(real_vocab_idxs), 14)
+    display_in_idxs = real_vocab_idxs[:max_vocab_display]
 
     # ---- Layer x positions ----
     lx = [0.0, 1.8, 3.6, 5.4]
@@ -78,9 +86,10 @@ def plot_3d_network(
     pos_in = layer_positions(max_vocab_display, lx[0], 0.5)
     pos_em = layer_positions(embed_dim, lx[1], 0.7)
     pos_hid = layer_positions(hidden_size, lx[2], 1.0)
-    # Show top-8 output nodes by probability
+    # Show top-8 output nodes by probability, excluding special tokens
     out_probs = activations["output"]
-    top_out_idxs = np.argsort(out_probs)[::-1][:8].tolist()
+    all_sorted_idxs = np.argsort(out_probs)[::-1].tolist()
+    top_out_idxs = [i for i in all_sorted_idxs if i not in special_idxs][:8]
     pos_out = layer_positions(len(top_out_idxs), lx[3], 0.5)
 
     fig = go.Figure()
@@ -166,7 +175,7 @@ def plot_3d_network(
 
     # ---- Input layer ----
     in_colors, in_sizes, in_labels, in_hover = [], [], [], []
-    for i in range(max_vocab_display):
+    for i in display_in_idxs:
         is_active = (i == input_idx)
         word = tokenizer.idx2word.get(i, "?")
         in_colors.append("rgba(0,230,130,0.95)" if is_active else "rgba(70,90,160,0.55)")
