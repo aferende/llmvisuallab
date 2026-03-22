@@ -193,11 +193,18 @@ with st.sidebar:
     new_lang = lang_options[selected_lang_name]
     if new_lang != st.session_state.lang:
         # Auto-swap default sentences if user hasn't customised them
-        old_default = _t("sec1_default_sentences", st.session_state.lang)
-        current_text = st.session_state.get("raw_sentences", old_default)
-        if current_text.strip() == old_default.strip():
+        old_sent_default = _t("sec1_default_sentences", st.session_state.lang)
+        current_sents = st.session_state.get("raw_sentences", old_sent_default)
+        if current_sents.strip() == old_sent_default.strip():
             st.session_state["raw_sentences"] = _t("sec1_default_sentences", new_lang)
             st.session_state.dataset_ready = False
+
+        # Auto-swap default inference query if user hasn't customised it
+        old_query_default = _t("sec3_default_query", st.session_state.lang)
+        current_query = st.session_state.get("infer_query", old_query_default)
+        if current_query.strip() == old_query_default.strip():
+            st.session_state["infer_query"] = _t("sec3_default_query", new_lang)
+
         st.session_state.lang = new_lang
         st.rerun()
 
@@ -610,7 +617,7 @@ else:
     with inf_col1:
         query_text = st.text_input(
             T("sec3_query_label"),
-            value="il gatto",
+            value=T("sec3_default_query"),
             placeholder=T("sec3_query_placeholder"),
             key="infer_query",
         )
