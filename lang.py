@@ -78,15 +78,15 @@ TRANSLATIONS = {
         ),
         "sec1_input_label": "Training sentences (one per line):",
         "sec1_default_sentences": (
-            "il gatto mangia il pesce\n"
-            "il cane mangia la carne\n"
-            "il gatto beve il latte\n"
-            "il cane beve l acqua\n"
             "the cat eats fish\n"
             "the dog eats meat\n"
-            "il sole splende forte\n"
-            "la luna brilla alta\n"
-            "il vento soffia freddo"
+            "the cat drinks milk\n"
+            "the dog drinks water\n"
+            "il gatto mangia il pesce\n"
+            "il cane mangia la carne\n"
+            "the sun shines bright\n"
+            "the moon glows high\n"
+            "the wind blows cold"
         ),
         "sec1_btn_tokenize": "🔍 Analyse Dataset",
         "sec1_vocab_title": "📚 Built vocabulary",
@@ -561,15 +561,15 @@ TRANSLATIONS = {
         ),
         "sec1_input_label": "Phrases d'entraînement (une par ligne) :",
         "sec1_default_sentences": (
-            "il gatto mangia il pesce\n"
-            "il cane mangia la carne\n"
-            "il gatto beve il latte\n"
-            "il cane beve l acqua\n"
+            "le chat mange du poisson\n"
+            "le chien mange de la viande\n"
+            "le chat boit du lait\n"
+            "le chien boit de l eau\n"
             "the cat eats fish\n"
             "the dog eats meat\n"
-            "il sole splende forte\n"
-            "la luna brilla alta\n"
-            "il vento soffia freddo"
+            "le soleil brille fort\n"
+            "la lune brille haute\n"
+            "le vent souffle froid"
         ),
         "sec1_btn_tokenize": "🔍 Analyser le jeu de données",
         "sec1_vocab_title": "📚 Vocabulaire construit",
@@ -730,15 +730,15 @@ TRANSLATIONS = {
         ),
         "sec1_input_label": "Trainingssätze (einer pro Zeile):",
         "sec1_default_sentences": (
-            "il gatto mangia il pesce\n"
-            "il cane mangia la carne\n"
-            "il gatto beve il latte\n"
-            "il cane beve l acqua\n"
+            "die Katze isst Fisch\n"
+            "der Hund isst Fleisch\n"
+            "die Katze trinkt Milch\n"
+            "der Hund trinkt Wasser\n"
             "the cat eats fish\n"
             "the dog eats meat\n"
-            "il sole splende forte\n"
-            "la luna brilla alta\n"
-            "il vento soffia freddo"
+            "die Sonne scheint hell\n"
+            "der Mond leuchtet hoch\n"
+            "der Wind weht kalt"
         ),
         "sec1_btn_tokenize": "🔍 Datensatz analysieren",
         "sec1_vocab_title": "📚 Erstelltes Vokabular",
@@ -899,15 +899,15 @@ TRANSLATIONS = {
         ),
         "sec1_input_label": "Frases de entrenamiento (una por línea):",
         "sec1_default_sentences": (
-            "il gatto mangia il pesce\n"
-            "il cane mangia la carne\n"
-            "il gatto beve il latte\n"
-            "il cane beve l acqua\n"
+            "el gato come pescado\n"
+            "el perro come carne\n"
+            "el gato bebe leche\n"
+            "el perro bebe agua\n"
             "the cat eats fish\n"
             "the dog eats meat\n"
-            "il sole splende forte\n"
+            "el sol brilla fuerte\n"
             "la luna brilla alta\n"
-            "il vento soffia freddo"
+            "el viento sopla frio"
         ),
         "sec1_btn_tokenize": "🔍 Analizar Dataset",
         "sec1_vocab_title": "📚 Vocabulario construido",
@@ -1062,15 +1062,15 @@ TRANSLATIONS = {
         ),
         "sec1_input_label": "训练句子（每行一句）：",
         "sec1_default_sentences": (
-            "il gatto mangia il pesce\n"
-            "il cane mangia la carne\n"
-            "il gatto beve il latte\n"
-            "il cane beve l acqua\n"
+            "猫 吃 鱼\n"
+            "狗 吃 肉\n"
+            "猫 喝 牛奶\n"
+            "狗 喝 水\n"
             "the cat eats fish\n"
             "the dog eats meat\n"
-            "il sole splende forte\n"
-            "la luna brilla alta\n"
-            "il vento soffia freddo"
+            "太阳 照耀 明亮\n"
+            "月亮 高高 发光\n"
+            "风 吹 寒冷"
         ),
         "sec1_btn_tokenize": "🔍 分析数据集",
         "sec1_vocab_title": "📚 构建的词汇表",
@@ -1230,15 +1230,15 @@ TRANSLATIONS = {
         ),
         "sec1_input_label": "Обучающие предложения (по одному на строку):",
         "sec1_default_sentences": (
-            "il gatto mangia il pesce\n"
-            "il cane mangia la carne\n"
-            "il gatto beve il latte\n"
-            "il cane beve l acqua\n"
+            "кот ест рыбу\n"
+            "пёс ест мясо\n"
+            "кот пьёт молоко\n"
+            "пёс пьёт воду\n"
             "the cat eats fish\n"
             "the dog eats meat\n"
-            "il sole splende forte\n"
-            "la luna brilla alta\n"
-            "il vento soffia freddo"
+            "солнце светит ярко\n"
+            "луна светит высоко\n"
+            "ветер дует холодно"
         ),
         "sec1_btn_tokenize": "🔍 Анализировать датасет",
         "sec1_vocab_title": "📚 Построенный словарь",
