@@ -812,10 +812,24 @@ def plot_similarity_heatmap(
         y=labels,
         colorscale="RdBu",
         zmid=0,
+        zmin=-1,
+        zmax=1,
         text=np.round(sim_matrix, 2),
         texttemplate="%{text}",
         textfont=dict(size=9),
         hovertemplate="%{y} – %{x}: %{z:.3f}<extra></extra>",
+        colorbar=dict(
+            title=dict(
+                text="Cosine",
+                side="right",
+                font=dict(color="rgba(200,220,255,0.8)", size=10),
+            ),
+            tickvals=[-1, -0.5, 0, 0.5, 1],
+            ticktext=["-1 opposite", "-0.5", "0 orthogonal", "+0.5", "+1 identical"],
+            tickfont=dict(color="rgba(200,220,255,0.75)", size=9),
+            outlinewidth=0,
+            thickness=14,
+        ),
     ))
     fig.update_layout(
         title=dict(
@@ -826,7 +840,7 @@ def plot_similarity_heatmap(
         paper_bgcolor="rgb(12,14,26)",
         plot_bgcolor="rgb(18,20,36)",
         font=dict(color="rgba(200,220,255,0.85)", size=10),
-        margin=dict(l=60, r=20, t=50, b=60),
+        margin=dict(l=60, r=100, t=50, b=60),
         height=420,
     )
     return fig

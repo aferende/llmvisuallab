@@ -27,6 +27,7 @@ Everything runs on a tiny NumPy model trained on **your own custom sentences** �
 - **Non-technical users** who want to understand what AI is really doing inside
 - **Students and educators** approaching machine learning for the first time
 - **Beginners** curious about how transformers, embeddings and language models work
+- **AI developers** who want to build a deeper intuition for the mechanics behind LLMs — tokenisation, backpropagation, embedding spaces and cosine similarity — without the abstraction layers of a full framework
 
 ---
 
@@ -175,3 +176,7 @@ plotly     ≥ 5.17
 
 *LLM Visual Lab — built for curiosity, not production.*
 *Live demo: [llmvisuallab.streamlit.app](https://llmvisuallab.streamlit.app)*
+
+---
+
+*Built with [Claude Code](https://claude.ai/claude-code) — Anthropic's AI coding assistant.*

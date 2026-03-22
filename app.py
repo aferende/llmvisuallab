@@ -64,7 +64,7 @@ load_css()
 
 def init_state() -> None:
     defaults = {
-        "lang": "it",
+        "lang": "en",
         "tokenizer": None,
         "model": None,
         "trained": False,
@@ -172,11 +172,23 @@ with st.sidebar:
     st.divider()
 
     # Language selector
-    lang_options = {"🇮🇹 Italiano": "it", "🇬🇧 English": "en"}
+    lang_options = {
+        "🇬🇧 English": "en",
+        "🇮🇹 Italiano": "it",
+        "🇫🇷 Français": "fr",
+        "🇩🇪 Deutsch": "de",
+        "🇪🇸 Español": "es",
+        "🇨🇳 中文": "zh",
+        "🇷🇺 Русский": "ru",
+    }
+    lang_codes = list(lang_options.values())
+    lang_names = list(lang_options.keys())
+    current_idx = lang_codes.index(st.session_state.lang) if st.session_state.lang in lang_codes else 0
+
     selected_lang_name = st.selectbox(
         T("sidebar_lang"),
-        list(lang_options.keys()),
-        index=0 if st.session_state.lang == "it" else 1,
+        lang_names,
+        index=current_idx,
     )
     new_lang = lang_options[selected_lang_name]
     if new_lang != st.session_state.lang:
@@ -191,7 +203,7 @@ with st.sidebar:
     st.divider()
 
     # Training hyperparameters
-    st.markdown(f"### ⚙️ {'Iperparametri' if LANG == 'it' else 'Hyperparameters'}")
+    st.markdown(T("sidebar_hyperparams"))
     hidden_size = st.slider(T("sidebar_brain_size"), min_value=4, max_value=64,
                             value=16, step=4)
     n_steps = st.slider(T("sidebar_steps"), min_value=10, max_value=300,
@@ -202,16 +214,31 @@ with st.sidebar:
     st.markdown(T("sidebar_about"))
     st.caption(T("sidebar_about_text"))
 
+    # GitHub link
+    st.markdown(
+        f'<a href="https://github.com/aferende/llmvisuallab" target="_blank" '
+        f'style="display:inline-block;margin-top:6px;color:#a78bfa;font-size:0.85rem;">'
+        f'{T("sidebar_github")}</a>',
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
+    # Credits
+    st.markdown(f"**{T('sidebar_credits_title')}**")
+    st.markdown(T("sidebar_credits_text"))
+
 
 # ======================================================================
 # HERO HEADER
 # ======================================================================
 
 st.markdown(
-    f'<div class="hero-header">'
-    f'<h1>{T("app_title")}</h1>'
+    '<div class="hero-header">'
+    '<div style="font-size:3.5rem;margin-bottom:6px;line-height:1.1;">🧠</div>'
+    f'<h1>LLM Visual Lab</h1>'
     f'<p>{T("app_subtitle")}</p>'
-    f'</div>',
+    '</div>',
     unsafe_allow_html=True,
 )
 
@@ -266,11 +293,11 @@ if btn_tokenize or st.session_state.dataset_ready:
     sentences = [s.strip() for s in raw_input.strip().splitlines() if s.strip()]
 
     if len(sentences) < 2:
-        st.warning("Inserisci almeno 2 frasi. / Please enter at least 2 sentences.")
+        st.warning("Please enter at least 2 sentences.")
     elif len(sentences) > 100:
         st.error(
-            f"Massimo 100 frasi consentite / Maximum 100 sentences allowed. "
-            f"({len(sentences)} inserite / entered)"
+            f"Maximum 100 sentences allowed. "
+            f"({len(sentences)} entered)"
         )
     else:
         tokenizer = Tokenizer()
@@ -321,7 +348,7 @@ if btn_tokenize or st.session_state.dataset_ready:
                 f"`{tokenizer.idx2word[inp]}` → `{tokenizer.idx2word[tgt]}`"
             )
         if len(pairs) > 16:
-            st.caption(f"... e altri {len(pairs) - 16} coppie")
+            st.caption(f"... and {len(pairs) - 16} more pairs")
 
         # ---- Per-sentence tokenisation ----
         with st.expander(T("sec1_tokenization_title"), expanded=False):
@@ -347,7 +374,7 @@ section_header(T("sec2_title"))
 tip(T("sec2_intro"))
 
 if not st.session_state.dataset_ready:
-    st.info("⚠️ Completa prima la Sezione 1. / Complete Section 1 first.")
+    st.info(T("sec2_warn_first"))
 else:
     tokenizer = st.session_state.tokenizer
     pairs = st.session_state.pairs
@@ -363,7 +390,7 @@ else:
             f'\n'
             f'Objective : next-token prediction\n'
             f'Loss      : cross-entropy\n'
-            f'Optimizer : SGD  lr=0.05\n'
+            f'Optimizer : SGD  lr=0.1\n'
             f'Steps     : {n_steps}\n'
             f'Pairs     : {len(pairs)}'
             f'</div>',
@@ -605,14 +632,8 @@ else:
             query_emb_for_viz = get_sentence_embedding(model, tokenizer, query_text.strip())
             query_label_for_viz = query_text.strip()
 
-    tab_2d, tab_3d = st.tabs(["2D (PCA)", "3D (PCA)"])
-    with tab_2d:
-        fig_2d = plot_embeddings_2d(
-            embeddings, labels,
-            query_label_for_viz, query_emb_for_viz,
-            lang_labels,
-        )
-        st.plotly_chart(fig_2d, width='stretch')
+    # 3D tab first
+    tab_3d, tab_2d = st.tabs(["3D (PCA)", "2D (PCA)"])
     with tab_3d:
         fig_3d = plot_embeddings_3d(
             embeddings, labels,
@@ -620,6 +641,13 @@ else:
             lang_labels,
         )
         st.plotly_chart(fig_3d, width='stretch')
+    with tab_2d:
+        fig_2d = plot_embeddings_2d(
+            embeddings, labels,
+            query_label_for_viz, query_emb_for_viz,
+            lang_labels,
+        )
+        st.plotly_chart(fig_2d, width='stretch')
 
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
 
@@ -651,7 +679,7 @@ else:
             st.metric(
                 f"cos({word1}, {word2})",
                 f"{sim:.4f}",
-                help="Range: -1 (opposti) → 0 (ortogonali) → 1 (identici)",
+                help="Range: -1 (opposite) → 0 (orthogonal) → 1 (identical)",
             )
 
         # Sphere info with word names interpolated
@@ -716,8 +744,10 @@ else:
 st.markdown(
     '<div style="text-align:center;margin-top:40px;color:rgba(120,140,180,0.5);'
     'font-size:0.8rem;padding-bottom:20px;">'
-    "LLM Visual Lab — Progetto educativo open-source | "
-    "Powered by NumPy + Streamlit + Plotly"
+    "LLM Visual Lab — Open-source educational project | "
+    "Powered by NumPy · Streamlit · Plotly · "
+    '<a href="https://claude.ai/claude-code" target="_blank" '
+    'style="color:rgba(167,139,250,0.6);text-decoration:none;">Built with Claude Code</a>'
     "</div>",
     unsafe_allow_html=True,
 )
