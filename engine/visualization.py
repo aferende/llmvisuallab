@@ -236,19 +236,20 @@ def plot_3d_network(
         lang_labels.get("layer_out", "Output"),
     ]
     layer_sizes = [
-        f"{max_vocab_display} token",
-        f"{embed_dim} dim",
-        f"{model.hidden_size} neuroni",
-        f"top-8 token",
+        f"({max_vocab_display} token)",
+        f"({embed_dim} dim)",
+        f"({model.hidden_size} neuroni)",
+        "(top-8 token)",
     ]
     for xi, name, sz, pos_list in zip(lx, layer_names, layer_sizes,
                                       [pos_in, pos_em, pos_hid, pos_out]):
         top_z = max(p[2] for p in pos_list) + 0.7
+        # NOTE: Plotly 3D does NOT render HTML — plain text only
         fig.add_trace(go.Scatter3d(
             x=[xi], y=[0], z=[top_z],
             mode="text",
-            text=[f"<b>{name}</b><br><span style='font-size:9px'>{sz}</span>"],
-            textfont=dict(size=11, color="rgba(180,200,255,0.95)"),
+            text=[f"{name} {sz}"],
+            textfont=dict(size=11, color="rgba(180,210,255,0.95)"),
             hoverinfo="none",
             showlegend=False,
         ))
@@ -290,21 +291,42 @@ def plot_loss_curve(
     losses: List[float],
     lang_labels: Dict[str, str],
 ) -> go.Figure:
-    """Loss-over-steps line chart with annotations."""
+    """
+    Loss-over-steps chart with:
+    - Raw instantaneous loss (light, semi-transparent)
+    - Rolling-average smoothed trend line (bold) — shows clear downward trend
+    """
     fig = go.Figure()
     xs = list(range(1, len(losses) + 1))
+    loss_label = lang_labels.get("loss_label", "Loss")
+    step_label = lang_labels.get("step_label", "Step")
+
+    # ── Raw loss — thin, semi-transparent background ───────────────────
     fig.add_trace(go.Scatter(
-        y=losses,
-        x=xs,
+        y=losses, x=xs,
         mode="lines",
-        line=dict(color="#00d4ff", width=2.5),
-        fill="tozeroy",
-        fillcolor="rgba(0,212,255,0.07)",
-        name=lang_labels.get("loss_label", "Loss"),
-        hovertemplate="Step %{x}: loss = %{y:.4f}<extra></extra>",
+        line=dict(color="rgba(0,212,255,0.25)", width=1),
+        name=f"{loss_label} (raw)",
+        hovertemplate=f"{step_label} %{{x}}: %{{y:.4f}}<extra></extra>",
     ))
 
-    # Mark best and worst points
+    # ── Smoothed trend line ─────────────────────────────────────────────
+    if len(losses) >= 5:
+        window = max(5, len(losses) // 10)
+        kernel = np.ones(window) / window
+        smoothed = np.convolve(losses, kernel, mode="valid")
+        xs_sm = list(range(window, len(losses) + 1))
+        fig.add_trace(go.Scatter(
+            y=smoothed.tolist(), x=xs_sm,
+            mode="lines",
+            line=dict(color="#00d4ff", width=3),
+            fill="tozeroy",
+            fillcolor="rgba(0,212,255,0.07)",
+            name=f"{loss_label} (trend)",
+            hovertemplate=f"{step_label} %{{x}}: %{{y:.4f}}<extra></extra>",
+        ))
+
+    # ── Best-loss star marker ────────────────────────────────────────────
     if len(losses) > 1:
         best_idx = int(np.argmin(losses))
         fig.add_trace(go.Scatter(
@@ -315,17 +337,21 @@ def plot_loss_curve(
             textposition="top center",
             textfont=dict(size=9, color="#00ff88"),
             showlegend=False,
-            hovertemplate=f"Minimo: {losses[best_idx]:.4f}<extra></extra>",
+            hovertemplate=f"Min: {losses[best_idx]:.4f}<extra></extra>",
         ))
 
     fig.update_layout(
-        xaxis_title=lang_labels.get("step_label", "Step"),
-        yaxis_title=lang_labels.get("loss_label", "Loss"),
+        xaxis_title=step_label,
+        yaxis_title=loss_label,
         paper_bgcolor="rgb(12,14,26)",
         plot_bgcolor="rgb(18,20,36)",
         font=dict(color="rgba(200,220,255,0.85)", size=11),
+        legend=dict(
+            orientation="h", yanchor="top", y=1.0, xanchor="right", x=1.0,
+            font=dict(size=9), bgcolor="rgba(0,0,0,0)",
+        ),
         margin=dict(l=50, r=20, t=30, b=40),
-        height=240,
+        height=260,
     )
     fig.update_xaxes(gridcolor="rgba(100,120,200,0.15)", zeroline=False)
     fig.update_yaxes(gridcolor="rgba(100,120,200,0.15)", zeroline=False)
@@ -411,41 +437,101 @@ def plot_embeddings_3d(
     query_emb: Optional[np.ndarray],
     lang_labels: Dict[str, str],
 ) -> go.Figure:
-    """3D scatter of word embeddings reduced to 3D via PCA."""
+    """
+    3D vector space: each word is drawn as an arrow from the origin (0,0,0)
+    to its PCA-reduced 3D position. Cartesian axes X/Y/Z are clearly visible.
+    """
+    bg = "rgb(12, 14, 26)"
     all_embs = embeddings
     all_labels = list(labels)
 
     if query_emb is not None and query_label:
         all_embs = np.vstack([embeddings, query_emb.reshape(1, -1)])
-        all_labels = list(labels) + [f"❓ {query_label}"]
+        all_labels = list(labels) + [f"? {query_label}"]
 
     if all_embs.shape[1] > 3:
         coords = pca_reduce(all_embs, 3)
     elif all_embs.shape[1] == 3:
-        coords = all_embs
+        coords = all_embs.copy()
     else:
         pad = np.zeros((len(all_embs), 3 - all_embs.shape[1]))
         coords = np.hstack([all_embs, pad])
 
     n_vocab = len(labels)
-    colors = ["rgba(80,160,255,0.9)"] * n_vocab
-    sizes = [8] * n_vocab
-    if query_emb is not None:
-        colors.append("rgba(255,200,0,0.95)")
-        sizes.append(15)
 
     fig = go.Figure()
+
+    # ── Cartesian axes (X=red, Y=green, Z=blue) ───────────────────────
+    axis_range = float(np.abs(coords).max()) * 1.2 + 0.1
+    for direction, color, axis_lbl in [
+        ([1, 0, 0], "rgba(255,80,80,0.8)", "PC1"),
+        ([0, 1, 0], "rgba(80,220,80,0.8)", "PC2"),
+        ([0, 0, 1], "rgba(80,130,255,0.8)", "PC3"),
+    ]:
+        end = [d * axis_range for d in direction]
+        fig.add_trace(go.Scatter3d(
+            x=[0, end[0]], y=[0, end[1]], z=[0, end[2]],
+            mode="lines+text",
+            line=dict(color=color, width=3),
+            text=["", axis_lbl],
+            textfont=dict(size=10, color=color),
+            hoverinfo="none",
+            showlegend=False,
+        ))
+        # Negative axis stub (lighter)
+        neg = [-d * axis_range * 0.4 for d in direction]
+        fig.add_trace(go.Scatter3d(
+            x=[0, neg[0]], y=[0, neg[1]], z=[0, neg[2]],
+            mode="lines",
+            line=dict(color=color.replace("0.8", "0.2"), width=1),
+            hoverinfo="none",
+            showlegend=False,
+        ))
+
+    # ── Origin marker ──────────────────────────────────────────────────
+    fig.add_trace(go.Scatter3d(
+        x=[0], y=[0], z=[0],
+        mode="markers+text",
+        marker=dict(size=6, color="white", symbol="circle"),
+        text=["O"],
+        textfont=dict(size=9, color="rgba(200,200,200,0.6)"),
+        hoverinfo="none",
+        showlegend=False,
+    ))
+
+    # ── Vector lines from origin ───────────────────────────────────────
+    for i, (coord, label) in enumerate(zip(coords, all_labels)):
+        is_query = (i >= n_vocab)
+        lc = "rgba(255,200,0,0.85)" if is_query else "rgba(80,140,255,0.50)"
+        lw = 3 if is_query else 1.5
+        fig.add_trace(go.Scatter3d(
+            x=[0, coord[0]], y=[0, coord[1]], z=[0, coord[2]],
+            mode="lines",
+            line=dict(color=lc, width=lw),
+            hoverinfo="skip",
+            showlegend=False,
+        ))
+
+    # ── Tip markers + word labels ──────────────────────────────────────
+    tip_colors = ["rgba(100,180,255,0.9)"] * n_vocab
+    tip_sizes = [7] * n_vocab
+    if query_emb is not None:
+        tip_colors.append("rgba(255,200,0,0.95)")
+        tip_sizes.append(13)
+
     fig.add_trace(go.Scatter3d(
         x=coords[:, 0], y=coords[:, 1], z=coords[:, 2],
         mode="markers+text",
         text=all_labels,
-        textfont=dict(size=9, color="rgba(220,235,255,0.9)"),
+        textposition="top center",
+        textfont=dict(size=10, color="rgba(220,235,255,0.95)"),
         marker=dict(
-            color=colors,
-            size=sizes,
-            line=dict(width=0.8, color="rgba(255,255,255,0.25)"),
+            color=tip_colors,
+            size=tip_sizes,
+            line=dict(width=0.8, color="rgba(255,255,255,0.3)"),
         ),
-        hovertemplate="<b>%{text}</b><extra></extra>",
+        hovertemplate="<b>%{text}</b><br>(%{x:.3f}, %{y:.3f}, %{z:.3f})<extra></extra>",
+        showlegend=False,
     ))
 
     fig.update_layout(
@@ -455,14 +541,34 @@ def plot_embeddings_3d(
             x=0.5,
         ),
         scene=dict(
-            bgcolor="rgb(12,14,26)",
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False),
-            zaxis=dict(visible=False),
+            bgcolor=bg,
+            xaxis=dict(
+                title="PC1", showgrid=True,
+                gridcolor="rgba(255,80,80,0.12)",
+                zeroline=True, zerolinecolor="rgba(255,80,80,0.3)",
+                showbackground=False,
+                tickfont=dict(color="rgba(200,200,200,0.5)", size=8),
+            ),
+            yaxis=dict(
+                title="PC2", showgrid=True,
+                gridcolor="rgba(80,220,80,0.12)",
+                zeroline=True, zerolinecolor="rgba(80,220,80,0.3)",
+                showbackground=False,
+                tickfont=dict(color="rgba(200,200,200,0.5)", size=8),
+            ),
+            zaxis=dict(
+                title="PC3", showgrid=True,
+                gridcolor="rgba(80,130,255,0.12)",
+                zeroline=True, zerolinecolor="rgba(80,130,255,0.3)",
+                showbackground=False,
+                tickfont=dict(color="rgba(200,200,200,0.5)", size=8),
+            ),
+            aspectmode="cube",
+            camera=dict(eye=dict(x=1.6, y=1.4, z=0.9)),
         ),
-        paper_bgcolor="rgb(12,14,26)",
+        paper_bgcolor=bg,
         margin=dict(l=0, r=0, t=40, b=0),
-        height=420,
+        height=500,
     )
     return fig
 

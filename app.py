@@ -195,7 +195,7 @@ with st.sidebar:
     hidden_size = st.slider(T("sidebar_brain_size"), min_value=4, max_value=64,
                             value=16, step=4)
     n_steps = st.slider(T("sidebar_steps"), min_value=10, max_value=300,
-                        value=80, step=10)
+                        value=150, step=10)
 
     st.divider()
 
@@ -251,6 +251,7 @@ st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
 
 section_header(T("sec1_title"))
 tip(T("sec1_intro"))
+tip(T("token_reality_note"))
 
 raw_input = st.text_area(
     T("sec1_input_label"),
@@ -266,6 +267,11 @@ if btn_tokenize or st.session_state.dataset_ready:
 
     if len(sentences) < 2:
         st.warning("Inserisci almeno 2 frasi. / Please enter at least 2 sentences.")
+    elif len(sentences) > 100:
+        st.error(
+            f"Massimo 100 frasi consentite / Maximum 100 sentences allowed. "
+            f"({len(sentences)} inserite / entered)"
+        )
     else:
         tokenizer = Tokenizer()
         tokenizer.fit(sentences)
@@ -418,7 +424,7 @@ else:
         losses = []
         UPDATE_VIZ_EVERY = max(1, n_steps // 40)  # update viz up to 40 times
 
-        for state in train(model, pairs, n_steps, lr=0.05):
+        for state in train(model, pairs, n_steps, lr=0.1):
             step = state["step"]
             loss = state["loss"]
             losses.append(loss)

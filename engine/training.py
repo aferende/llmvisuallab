@@ -72,11 +72,14 @@ def train(
     model: TinyLM,
     pairs: List[Tuple[int, int]],
     n_steps: int,
-    lr: float = 0.05,
+    lr: float = 0.1,
 ) -> Generator[Dict, None, None]:
     """
     Training loop generator – yields a state dict at every step so the
     caller (Streamlit) can update the UI without blocking.
+
+    Pairs are shuffled at the start of each epoch so the loss curve shows
+    a clean downward trend rather than oscillating in a fixed cycle.
 
     Usage:
         for state in train(model, pairs, n_steps=100):
@@ -85,9 +88,16 @@ def train(
     if not pairs:
         return
 
+    rng = np.random.default_rng(42)
+    pairs_arr = list(pairs)
+    epoch_order = list(range(len(pairs_arr)))
+
     for step in range(n_steps):
-        # Cycle through pairs deterministically
-        input_idx, target_idx = pairs[step % len(pairs)]
+        # Reshuffle at the start of every new epoch
+        if step % len(pairs_arr) == 0:
+            epoch_order = rng.permutation(len(pairs_arr)).tolist()
+
+        input_idx, target_idx = pairs_arr[epoch_order[step % len(pairs_arr)]]
         loss, acts, grads = train_step(model, input_idx, target_idx, lr)
 
         yield {

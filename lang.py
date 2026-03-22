@@ -56,7 +56,18 @@ TRANSLATIONS = {
         "sec1_title": "📝 Sezione 1 — Dataset e Tokenizzazione",
         "sec1_intro": (
             "Inserisci le frasi che vuoi usare per addestrare il modello. "
-            "Una frase per riga. Puoi usare italiano, inglese o entrambi!"
+            "Una frase per riga. Puoi usare italiano, inglese o entrambi! "
+            "(massimo 100 frasi)"
+        ),
+        "token_reality_note": (
+            "⚠️ <b>Nota didattica sui token:</b> Nei modelli reali (GPT, Claude, ecc.) "
+            "un token <b>non è una parola intera</b>, ma un <b>frammento di parola</b> "
+            "(subword). Ad esempio la parola <i>incomprensibile</i> potrebbe diventare "
+            "3 token: <code>in</code> + <code>comprens</code> + <code>ibile</code>. "
+            "Questo consente di gestire parole rare, neologismi e lingue diverse con un "
+            "vocabolario limitato. "
+            "In questo laboratorio usiamo invece <b>una parola = un token</b> "
+            "per semplicità didattica, così è più facile seguire ogni passaggio."
         ),
         "sec1_input_label": "Frasi di training (una per riga):",
         "sec1_default_sentences": (
@@ -137,8 +148,8 @@ TRANSLATIONS = {
         "sec3_word2_label": "Seconda parola:",
         "sec3_search_title": "🔍 Ricerca Semantica",
         "sec3_search_info": (
-            "Il modello trova la frase del dataset più simile "
-            "semanticamente al tuo query."
+            "Il modello confronta la tua ricerca con tutte le frasi del dataset "
+            "e restituisce quelle semanticamente più simili, ordinate per similarità."
         ),
         "sec3_search_btn": "🔍 Cerca",
         "sec3_heatmap_title": "🗺️ Mappa di Similarità",
@@ -277,7 +288,18 @@ TRANSLATIONS = {
         "sec1_title": "📝 Section 1 — Dataset & Tokenisation",
         "sec1_intro": (
             "Enter the sentences you want to use to train the model. "
-            "One sentence per line. You can use Italian, English or both!"
+            "One sentence per line. You can use Italian, English or both! "
+            "(max 100 sentences)"
+        ),
+        "token_reality_note": (
+            "⚠️ <b>Educational note on tokens:</b> In real models (GPT, Claude, etc.) "
+            "a token is <b>not a whole word</b> but a <b>word fragment</b> (subword). "
+            "For example <i>unbelievable</i> might become 3 tokens: "
+            "<code>un</code> + <code>believ</code> + <code>able</code>. "
+            "This lets models handle rare words, neologisms and multiple languages "
+            "with a fixed vocabulary. "
+            "In this lab we use <b>one word = one token</b> for educational simplicity, "
+            "so every step is easy to follow."
         ),
         "sec1_input_label": "Training sentences (one per line):",
         "sec1_default_sentences": (

@@ -14,8 +14,8 @@ venv/
 env/
 .env
 
-# Streamlit
-.streamlit/
+# Streamlit local secrets only (config.toml is committed for Cloud deployment)
+.streamlit/secrets.toml
 
 # OS
 .DS_Store
