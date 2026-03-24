@@ -8,6 +8,7 @@ import time
 import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
+import streamlit.components.v1 as components
 
 from engine.tokenizer import Tokenizer, SubwordTokenizer
 from engine.model import TinyLM
@@ -175,7 +176,7 @@ with st.sidebar:
 
     # Language selector
     lang_options = {
-        "EN — English": "en",
+        "🇬🇧 English": "en",
         "🇮🇹 Italiano": "it",
         "🇫🇷 Français": "fr",
         "🇩🇪 Deutsch": "de",
@@ -195,21 +196,16 @@ with st.sidebar:
     new_lang = lang_options[selected_lang_name]
     if new_lang != st.session_state.lang:
         # Auto-swap default sentences if user hasn't customised them
-        # Use BPE-specific defaults when in subword mode
-        _mode = st.session_state.tokenizer_mode
-        _sent_key = "sec1_default_sentences_bpe" if _mode == "subword" else "sec1_default_sentences"
-        _query_key = "sec3_default_query_bpe" if _mode == "subword" else "sec3_default_query"
-
-        old_sent_default = _t(_sent_key, st.session_state.lang)
+        old_sent_default = _t("sec1_default_sentences", st.session_state.lang)
         current_sents = st.session_state.get("raw_sentences", old_sent_default)
         if current_sents.strip() == old_sent_default.strip():
-            st.session_state["raw_sentences"] = _t(_sent_key, new_lang)
+            st.session_state["raw_sentences"] = _t("sec1_default_sentences", new_lang)
             st.session_state.dataset_ready = False
 
-        old_query_default = _t(_query_key, st.session_state.lang)
+        old_query_default = _t("sec3_default_query", st.session_state.lang)
         current_query = st.session_state.get("infer_query", old_query_default)
         if current_query.strip() == old_query_default.strip():
-            st.session_state["infer_query"] = _t(_query_key, new_lang)
+            st.session_state["infer_query"] = _t("sec3_default_query", new_lang)
 
         st.session_state.lang = new_lang
         st.rerun()
@@ -327,23 +323,6 @@ chosen_mode_label = st.radio(
 )
 new_mode = "word" if chosen_mode_label == T("tokenizer_mode_word") else "subword"
 if new_mode != st.session_state.tokenizer_mode:
-    # Auto-swap default sentences if user hasn't customised them
-    old_mode = st.session_state.tokenizer_mode
-    old_sent_key = "sec1_default_sentences_bpe" if old_mode == "subword" else "sec1_default_sentences"
-    new_sent_key = "sec1_default_sentences_bpe" if new_mode == "subword" else "sec1_default_sentences"
-    old_sent_default = _t(old_sent_key, LANG)
-    current_sents = st.session_state.get("raw_sentences", old_sent_default)
-    if current_sents.strip() == old_sent_default.strip():
-        st.session_state["raw_sentences"] = _t(new_sent_key, LANG)
-
-    # Auto-swap default inference query if user hasn't customised it
-    old_query_key = "sec3_default_query_bpe" if old_mode == "subword" else "sec3_default_query"
-    new_query_key = "sec3_default_query_bpe" if new_mode == "subword" else "sec3_default_query"
-    old_q_default = _t(old_query_key, LANG)
-    current_q = st.session_state.get("infer_query", old_q_default)
-    if current_q.strip() == old_q_default.strip():
-        st.session_state["infer_query"] = _t(new_query_key, LANG)
-
     st.session_state.tokenizer_mode = new_mode
     st.session_state.dataset_ready = False
     st.session_state.trained = False
@@ -359,14 +338,9 @@ else:
 
 tip(T("token_reality_note"))
 
-_default_sents = (
-    T("sec1_default_sentences_bpe")
-    if st.session_state.tokenizer_mode == "subword"
-    else T("sec1_default_sentences")
-)
 raw_input = st.text_area(
     T("sec1_input_label"),
-    value=_default_sents,
+    value=T("sec1_default_sentences"),
     height=160,
     key="raw_sentences",
 )
@@ -523,6 +497,17 @@ else:
         add_log(T("log_vocab", n=tokenizer.vocab_size))
         add_log(T("log_pairs", n=len(pairs)))
         add_log(T("log_start", steps=n_steps))
+
+        # Scroll viewport to the network section when training starts
+        st.markdown('<div id="net-anchor"></div>', unsafe_allow_html=True)
+        components.html(
+            '<script>setTimeout(function(){'
+            'var el=window.parent.document.getElementById("net-anchor");'
+            'if(el)el.scrollIntoView({behavior:"smooth",block:"start"});'
+            '},350);</script>',
+            height=0,
+            scrolling=False,
+        )
 
         # Explanation boxes shown before training starts
         st.markdown(f"#### {T('sec2_net_title')}")
@@ -784,14 +769,32 @@ else:
         [_disp(w) for w in tokenizer.vocab if w not in {tokenizer.PAD, tokenizer.UNK}]
     )
 
+    def _find_word_idx(word: str, vocab: list) -> int:
+        """Find index of word in display-form vocab list, with BPE suffix fallback."""
+        if word in vocab:
+            return vocab.index(word)
+        word_eow = word + _eow_disp if _eow else word
+        if word_eow in vocab:
+            return vocab.index(word_eow)
+        for i, v in enumerate(vocab):
+            if v.rstrip(_eow_disp) == word:
+                return i
+        return 0
+
+    _def_w1 = T("sec3_cos_default_w1")
+    _def_w2 = T("sec3_cos_default_w2")
+    _idx_w1 = _find_word_idx(_def_w1, vocab_words)
+    _idx_w2 = _find_word_idx(_def_w2, vocab_words)
+    if _idx_w1 == _idx_w2:
+        _idx_w2 = min(_idx_w1 + 1, len(vocab_words) - 1)
+
     cos_col1, cos_col2, cos_col3 = st.columns([2, 2, 3])
     with cos_col1:
         word1 = st.selectbox(T("sec3_word1_label"), vocab_words,
-                             index=0, key="cos_w1")
+                             index=_idx_w1, key="cos_w1")
     with cos_col2:
-        default_w2 = min(1, len(vocab_words) - 1)
         word2 = st.selectbox(T("sec3_word2_label"), vocab_words,
-                             index=default_w2, key="cos_w2")
+                             index=_idx_w2, key="cos_w2")
 
     if word1 and word2:
         v1 = model.get_embedding(tokenizer.vocab[_to_raw(word1)])

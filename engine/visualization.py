@@ -38,6 +38,13 @@ def _prob_color(val: float, alpha: float = 0.9) -> str:
     return _rgba(int(40 + 40 * t), int(80 + 175 * t), int(60 + 40 * t), alpha)
 
 
+def _tok_disp(tokenizer, tok: str) -> str:
+    """Replace internal BPE EOW marker with display character."""
+    eow = getattr(tokenizer, "_EOW", None)
+    eow_d = getattr(tokenizer, "_EOW_DISPLAY", "·")
+    return tok.replace(eow, eow_d) if eow else tok
+
+
 # ------------------------------------------------------------------
 # 3D Neural Network
 # ------------------------------------------------------------------
@@ -177,7 +184,7 @@ def plot_3d_network(
     in_colors, in_sizes, in_labels, in_hover = [], [], [], []
     for i in display_in_idxs:
         is_active = (i == input_idx)
-        word = tokenizer.idx2word.get(i, "?")
+        word = _tok_disp(tokenizer, tokenizer.idx2word.get(i, "?"))
         in_colors.append("rgba(0,230,130,0.95)" if is_active else "rgba(70,90,160,0.55)")
         in_sizes.append(14 if is_active else 7)
         in_labels.append(f"▶ {word}" if is_active else word)
@@ -223,7 +230,7 @@ def plot_3d_network(
     for oi, out_idx in enumerate(top_out_idxs):
         p = float(out_probs[out_idx])
         is_target = (out_idx == target_idx)
-        word = tokenizer.idx2word.get(out_idx, "?")
+        word = _tok_disp(tokenizer, tokenizer.idx2word.get(out_idx, "?"))
         out_colors.append("rgba(255,215,0,0.97)" if is_target else _prob_color(p))
         out_sizes.append(15 if is_target else 6 + int(p * 35))
         out_labels.append(f"★ {word}" if is_target else f"{word}")
@@ -236,32 +243,29 @@ def plot_3d_network(
                   lang_labels.get("layer_out", "Output"))
 
     # ================================================================
-    # Layer name annotations (above each layer)
+    # Right-side legend (paper coordinates — does not rotate with 3D scene)
     # ================================================================
-    layer_names = [
-        lang_labels.get("layer_input", "Input"),
-        lang_labels.get("layer_emb", "Embedding"),
-        lang_labels.get("layer_hid", "Hidden"),
-        lang_labels.get("layer_out", "Output"),
+    layer_defs = [
+        (lang_labels.get("layer_input", "Input"),
+         f"{max_vocab_display} token", "#00c8ff"),
+        (lang_labels.get("layer_emb", "Embedding"),
+         f"{embed_dim} dim", "#64dcb4"),
+        (lang_labels.get("layer_hid", "Hidden"),
+         f"{model.hidden_size} neuroni", "#ffa03c"),
+        (lang_labels.get("layer_out", "Output"),
+         "top-8 token", "#ffd700"),
     ]
-    layer_sizes = [
-        f"({max_vocab_display} token)",
-        f"({embed_dim} dim)",
-        f"({model.hidden_size} neuroni)",
-        "(top-8 token)",
-    ]
-    for xi, name, sz, pos_list in zip(lx, layer_names, layer_sizes,
-                                      [pos_in, pos_em, pos_hid, pos_out]):
-        top_z = max(p[2] for p in pos_list) + 0.7
-        # NOTE: Plotly 3D does NOT render HTML — plain text only
-        fig.add_trace(go.Scatter3d(
-            x=[xi], y=[0], z=[top_z],
-            mode="text",
-            text=[f"{name} {sz}"],
-            textfont=dict(size=11, color="rgba(180,210,255,0.95)"),
-            hoverinfo="none",
-            showlegend=False,
-        ))
+    for i, (lname, ldesc, lcolor) in enumerate(layer_defs):
+        fig.add_annotation(
+            xref="paper", yref="paper",
+            x=1.02, y=0.92 - i * 0.22,
+            text=f"<b>{lname}</b><br>"
+                 f"<span style='font-size:9px;color:rgba(180,200,240,0.6)'>{ldesc}</span>",
+            showarrow=False,
+            align="left",
+            xanchor="left",
+            font=dict(size=11, color=lcolor),
+        )
 
     # ================================================================
     # Layout
@@ -272,8 +276,8 @@ def plot_3d_network(
     fig.update_layout(
         title=dict(
             text=f"<b>{step_label} {step + 1}</b>  |  {loss_label}: <b>{loss:.4f}</b>  "
-                 f"|  Input: <b>{tokenizer.idx2word.get(input_idx,'?')}</b>  →  "
-                 f"Target: <b>{tokenizer.idx2word.get(target_idx,'?')}</b>",
+                 f"|  Input: <b>{_tok_disp(tokenizer, tokenizer.idx2word.get(input_idx,'?'))}</b>  →  "
+                 f"Target: <b>{_tok_disp(tokenizer, tokenizer.idx2word.get(target_idx,'?'))}</b>",
             font=dict(color="rgba(200,220,255,0.95)", size=13),
             x=0.5,
         ),
@@ -282,10 +286,10 @@ def plot_3d_network(
             xaxis=dict(visible=False),
             yaxis=dict(visible=False),
             zaxis=dict(visible=False),
-            camera=dict(eye=dict(x=1.6, y=-1.2, z=0.8)),
+            camera=dict(eye=dict(x=1.1, y=-0.85, z=0.55)),
         ),
         paper_bgcolor=bg,
-        margin=dict(l=0, r=0, t=50, b=0),
+        margin=dict(l=0, r=180, t=50, b=0),
         height=510,
     )
 
@@ -795,7 +799,7 @@ def plot_cosine_similarity_3d(
             yaxis=dict(visible=False, range=[-1.5, 1.5]),
             zaxis=dict(visible=False, range=[-1.5, 1.5]),
             aspectmode="cube",
-            camera=dict(eye=dict(x=1.5, y=1.3, z=0.9)),
+            camera=dict(eye=dict(x=1.1, y=0.95, z=0.65)),
         ),
         paper_bgcolor=bg,
         margin=dict(l=0, r=0, t=55, b=0),
@@ -892,11 +896,33 @@ def plot_inference_animation(
     STEEL  = "rgba(60,130,230,{a})"
     GREEN  = "rgba(0,230,120,{a})"
 
+    # BPE display helpers
+    _eow = getattr(tokenizer, "_EOW", None)
+    _eow_d = getattr(tokenizer, "_EOW_DISPLAY", "·")
+
+    def _td(tok: str) -> str:
+        return tok.replace(_eow, _eow_d) if _eow else tok
+
+    def _raw(tok: str) -> str:
+        return tok.replace(_eow_d, _eow) if _eow else tok
+
     V = model.vocab_size
     E = model.embed_dim
     H = model.hidden_size
+
+    # Exclude PAD/UNK from input display column
+    special_idxs = {
+        tokenizer.vocab.get(tokenizer.PAD, -1),
+        tokenizer.vocab.get(tokenizer.UNK, -2),
+    }
+    real_vocab_idxs = [i for i in range(V) if i not in special_idxs]
+    max_in = min(len(real_vocab_idxs), 14)
+    display_in_idxs = real_vocab_idxs[:max_in]
+
+    # Position of the active input in the display list
+    act_in = display_in_idxs.index(input_idx) if input_idx in display_in_idxs else 0
+
     top_k = min(len(predictions), 8)
-    max_in = min(V, 14)
 
     # ---- activations & weights ----------------------------------------
     emb_vals = activations["embedding"]   # [E]
@@ -908,22 +934,22 @@ def plot_inference_animation(
 
     top_words = [w for w, _ in predictions[:top_k]]
     top_probs = [p for _, p in predictions[:top_k]]
+    # Convert display tokens back to internal form for weight lookup
     top_out_idx = [
-        min(tokenizer.vocab.get(w, 1), V - 1)
+        min(tokenizer.vocab.get(_raw(w), tokenizer.vocab.get(w, 1)), V - 1)
         for w in top_words
     ]
 
-    # ---- 2-D node positions ------------------------------------------
+    # ---- 2-D node positions (wider horizontal spacing) ---------------
+    X_IN, X_EM, X_HD, X_OT = 0.0, 1.6, 3.2, 4.8
+
     def col_y(n: int) -> List[float]:
         return list(np.linspace(0.95, 0.05, n)) if n > 1 else [0.5]
 
-    in_y  = col_y(max_in);  in_x  = [0.00] * max_in
-    em_y  = col_y(E);       em_x  = [1.00] * E
-    hd_y  = col_y(H);       hd_x  = [2.00] * H
-    ot_y  = col_y(top_k);   ot_x  = [3.00] * top_k
-
-    # active input position
-    act_in = min(input_idx, max_in - 1)
+    in_y  = col_y(max_in);  in_x  = [X_IN] * max_in
+    em_y  = col_y(E);       em_x  = [X_EM] * E
+    hd_y  = col_y(H);       hd_x  = [X_HD] * H
+    ot_y  = col_y(top_k);   ot_x  = [X_OT] * top_k
 
     # ---- color helpers -----------------------------------------------
     def _act_color(v: float, alpha: float = 0.9) -> str:
@@ -944,17 +970,22 @@ def plot_inference_animation(
     GREEN_IN  = "rgba(0,230,130,0.97)"
     GREEN_WIN = "rgba(30,255,120,1.0)"
 
+    # ---- embedding hover texts (rich, always computed) ---------------
+    input_word_disp = _td(tokenizer.idx2word.get(input_idx, '?'))
+    em_hover = [
+        f"<b>e{j}</b> — dim {j} of embedding<br>"
+        f"Token: <b>{input_word_disp}</b><br>"
+        f"Value: <b>{emb_vals[j]:.4f}</b>"
+        for j in range(E)
+    ]
+
     # ---- edge builders -----------------------------------------------
     def _segs(src_xy, tgt_xy, wmat):
-        """
-        Returns (pos_xs, pos_ys, neg_xs, neg_ys) split by weight sign.
-        wmat shape: [n_src, n_tgt]
-        """
         pos_x, pos_y, neg_x, neg_y = [], [], [], []
         if wmat.size == 0:
             return pos_x, pos_y, neg_x, neg_y
         mx = float(np.max(np.abs(wmat))) or 1.0
-        threshold = mx * 0.08          # skip near-zero edges for clarity
+        threshold = mx * 0.08
         for i, (x0, y0) in enumerate(src_xy):
             for j, (x1, y1) in enumerate(tgt_xy):
                 w = float(wmat[i, j])
@@ -968,41 +999,35 @@ def plot_inference_animation(
 
     def _winner_segs():
         wx, wy = [], []
-        # in → em (active input only)
         for j in range(E):
             wx += [in_x[act_in], em_x[j], None]
             wy += [in_y[act_in], em_y[j], None]
-        # em → hid
         for i in range(E):
             for j in range(H):
                 wx += [em_x[i], hd_x[j], None]
                 wy += [em_y[i], hd_y[j], None]
-        # hid → winner (index 0 in top-k)
         for i in range(H):
             wx += [hd_x[i], ot_x[0], None]
             wy += [hd_y[i], ot_y[0], None]
         return wx, wy
 
-    # ---- background edges (all connections) --------------------------
+    # ---- background edges --------------------------------------------
     bg_x, bg_y = [], []
-    # in → em (all)
     for i in range(max_in):
         for j in range(E):
             bg_x += [in_x[i], em_x[j], None]
             bg_y += [in_y[i], em_y[j], None]
-    # em → hid
     for i in range(E):
         for j in range(H):
             bg_x += [em_x[i], hd_x[j], None]
             bg_y += [em_y[i], hd_y[j], None]
-    # hid → out top-k
     for i in range(H):
         for j in range(top_k):
             bg_x += [hd_x[i], ot_x[j], None]
             bg_y += [hd_y[i], ot_y[j], None]
 
     # ---- node labels -------------------------------------------------
-    in_labels = [tokenizer.idx2word.get(i, "?") for i in range(max_in)]
+    in_labels = [_td(tokenizer.idx2word.get(i, "?")) for i in display_in_idxs]
     em_labels = [f"e{j}" for j in range(E)]
     hd_labels = [f"h{j}" for j in range(H)]
     ot_labels_full = [
@@ -1010,47 +1035,41 @@ def plot_inference_animation(
     ]
     ot_labels_empty = [""] * top_k
 
-    # ---- per-frame state -----------------------------------------
-    # returns (pos_xs, pos_ys, neg_xs, neg_ys,
-    #          win_xs, win_ys, node_colors, node_sizes,
-    #          node_text, out_label_text)
+    # ---- per-frame state ---------------------------------------------
     def _frame_state(f: int):
-        # --- default: everything gray, no active edges
         nc = [GRAY_NODE] * (max_in + E + H + top_k)
         ns = [7]         * (max_in + E + H + top_k)
-        px, py, nx, ny = [], [], [], []
+        px, py, nx_, ny = [], [], [], []
         wx, wy = [], []
         out_txt = ot_labels_empty
 
-        if f >= 1:   # input node active
+        if f >= 1:
             nc[act_in] = GREEN_IN
             ns[act_in] = 16
 
-        if f >= 2:   # embedding activated
+        if f >= 2:
             w_in_em = W_emb[min(input_idx, V - 1), :].reshape(1, E)
-            px, py, nx, ny = _segs(
+            px, py, nx_, ny = _segs(
                 [(in_x[act_in], in_y[act_in])], list(zip(em_x, em_y)), w_in_em
             )
             for j in range(E):
                 nc[max_in + j] = _act_color(float(emb_vals[j]))
                 ns[max_in + j] = 8 + int(abs(float(emb_vals[j])) * 9)
 
-        if f >= 3:   # hidden activated
-            # contribution = diag(emb_vals) @ W_h  →  [E, H]
+        if f >= 3:
             wmat_eh = np.outer(emb_vals, np.ones(H)) * W_h
-            px, py, nx, ny = _segs(
+            px, py, nx_, ny = _segs(
                 list(zip(em_x, em_y)), list(zip(hd_x, hd_y)), wmat_eh
             )
             for j in range(H):
                 nc[max_in + E + j] = _act_color(float(hid_vals[j]))
                 ns[max_in + E + j] = 7 + int(abs(float(hid_vals[j])) * 11)
 
-        if f >= 4:   # output activated
-            # contributions: [H, top_k]
+        if f >= 4:
             wmat_ho = np.column_stack([
                 hid_vals * W_out[:, oi] for oi in top_out_idx
             ])
-            px, py, nx, ny = _segs(
+            px, py, nx_, ny = _segs(
                 list(zip(hd_x, hd_y)), list(zip(ot_x, ot_y)), wmat_ho
             )
             for j in range(top_k):
@@ -1058,22 +1077,22 @@ def plot_inference_animation(
                 ns[max_in + E + H + j] = 9 + int(top_probs[j] * 35)
             out_txt = ot_labels_full
 
-        if f == 5:   # winner path green
+        if f == 5:
             wx, wy = _winner_segs()
             nc[max_in + E + H] = GREEN_WIN
             ns[max_in + E + H] = 22
             out_txt = ot_labels_full
 
-        # flatten node positions and labels
         all_x = in_x + em_x + hd_x + ot_x
         all_y = in_y + em_y + hd_y + ot_y
         all_lbl = in_labels + em_labels + hd_labels + out_txt
+        # Richer hover: embedding nodes show token+value info
+        all_hover = in_labels + em_hover + hd_labels + out_txt
 
-        return px, py, nx, ny, wx, wy, nc, ns, all_x, all_y, all_lbl
+        return px, py, nx_, ny, wx, wy, nc, ns, all_x, all_y, all_lbl, all_hover
 
     # ---- build initial (frame 0) state -------------------------------
-    i0 = _frame_state(0)
-    px0, py0, nx0, ny0, wx0, wy0, nc0, ns0, allx0, ally0, lbl0 = i0
+    px0, py0, nx0, ny0, wx0, wy0, nc0, ns0, allx0, ally0, lbl0, hover0 = _frame_state(0)
 
     def _empty_trace(color="rgba(0,0,0,0)"):
         return go.Scatter(x=[], y=[], mode="lines",
@@ -1104,10 +1123,10 @@ def plot_inference_animation(
             textposition="middle right",
             textfont=dict(size=9, color="rgba(200,220,255,0.85)"),
             hoverinfo="text",
-            hovertext=lbl0,
+            hovertext=hover0,
             showlegend=False,
         ),
-        # 5: output label text only (separate trace for visibility toggle)
+        # 5: output label text only
         go.Scatter(
             x=ot_x, y=ot_y, mode="text",
             text=ot_labels_empty,
@@ -1119,7 +1138,7 @@ def plot_inference_animation(
         go.Scatter(
             x=[in_x[act_in]], y=[in_y[act_in]],
             mode="text",
-            text=[f"▶ {tokenizer.idx2word.get(input_idx, '?')}"],
+            text=[f"▶ {_td(tokenizer.idx2word.get(input_idx, '?'))}"],
             textposition="middle left",
             textfont=dict(size=12, color=GREEN_IN),
             showlegend=False, hoverinfo="none",
@@ -1138,28 +1157,22 @@ def plot_inference_animation(
 
     frames = []
     for f in range(6):
-        px, py, nx, ny, wx, wy, nc, ns, ax, ay, lbl = _frame_state(f)
-        _, _, _, _, _, _, _, _, _, _, out_lbl = _frame_state(f)
-        # Extract only the output portion of lbl for trace 5
+        px, py, nx_, ny, wx, wy, nc, ns, ax, ay, lbl, hover = _frame_state(f)
         out_lbl_only = lbl[max_in + E + H:]
 
         frame = go.Frame(
             name=frame_names[f],
             traces=[1, 2, 3, 4, 5],
             data=[
-                # trace 1: positive edges
                 go.Scatter(x=px, y=py, mode="lines",
                            line=dict(color=ORANGE.format(a=0.75), width=1.8),
                            hoverinfo="none", showlegend=False),
-                # trace 2: negative edges
-                go.Scatter(x=nx, y=ny, mode="lines",
+                go.Scatter(x=nx_, y=ny, mode="lines",
                            line=dict(color=STEEL.format(a=0.65), width=1.8),
                            hoverinfo="none", showlegend=False),
-                # trace 3: winner edges
                 go.Scatter(x=wx, y=wy, mode="lines",
                            line=dict(color=GREEN.format(a=0.90), width=2.5),
                            hoverinfo="none", showlegend=False),
-                # trace 4: nodes
                 go.Scatter(
                     x=ax, y=ay,
                     mode="markers+text",
@@ -1168,9 +1181,8 @@ def plot_inference_animation(
                     text=lbl,
                     textposition="middle right",
                     textfont=dict(size=9, color="rgba(200,220,255,0.85)"),
-                    hoverinfo="text", hovertext=lbl, showlegend=False,
+                    hoverinfo="text", hovertext=hover, showlegend=False,
                 ),
-                # trace 5: output labels
                 go.Scatter(
                     x=ot_x, y=ot_y, mode="text",
                     text=out_lbl_only,
@@ -1184,18 +1196,23 @@ def plot_inference_animation(
 
     fig.frames = frames
 
-    # ---- layer annotations (static) ----------------------------------
-    for lx, lbl in [(0.0, "Input"), (1.0, "Embedding"), (2.0, "Hidden"), (3.0, "Output")]:
+    # ---- layer annotations (use lang_labels, updated x positions) ----
+    for lx_ann, lbl_ann in [
+        (X_IN,  lang_labels.get("layer_input", "Input")),
+        (X_EM,  lang_labels.get("layer_emb", "Embedding")),
+        (X_HD,  lang_labels.get("layer_hid", "Hidden")),
+        (X_OT,  lang_labels.get("layer_out", "Output")),
+    ]:
         fig.add_annotation(
-            x=lx, y=1.03, xref="x", yref="paper",
-            text=f"<b>{lbl}</b>",
+            x=lx_ann, y=1.03, xref="x", yref="paper",
+            text=f"<b>{lbl_ann}</b>",
             showarrow=False,
             font=dict(size=11, color="rgba(167,139,250,0.9)"),
         )
 
     # Probability legend annotation
     fig.add_annotation(
-        x=3.35, y=0.5, xref="x", yref="paper",
+        x=X_OT + 0.5, y=0.5, xref="x", yref="paper",
         text=(
             "<b>% = probability</b><br>"
             "<span style='color:rgba(255,140,30,0.9)'>─ positive weight</span><br>"
@@ -1221,7 +1238,7 @@ def plot_inference_animation(
         title=dict(
             text=(
                 f"<b>{lang_labels.get('inference_anim_title', 'Inference Animation')}</b>"
-                f" — input: <b>{tokenizer.idx2word.get(input_idx, '?')}</b>"
+                f" — input: <b>{_td(tokenizer.idx2word.get(input_idx, '?'))}</b>"
                 f" → top: <b>{top_words[0] if top_words else '?'}</b>"
                 f" ({top_probs[0]*100:.1f}%)"
             ),
@@ -1232,19 +1249,20 @@ def plot_inference_animation(
         plot_bgcolor=BG,
         font=dict(color="rgba(200,220,255,0.85)", size=10),
         xaxis=dict(
-            range=[-0.35, 3.85],
+            range=[-0.5, X_OT + 1.2],
             showgrid=False, zeroline=False, showticklabels=False,
         ),
         yaxis=dict(
             range=[-0.05, 1.1],
             showgrid=False, zeroline=False, showticklabels=False,
-            scaleanchor="x", scaleratio=3.5,
+            scaleanchor="x", scaleratio=4.5,
         ),
         height=520,
         margin=dict(l=20, r=160, t=60, b=80),
         updatemenus=[dict(
             type="buttons",
             showactive=False,
+            direction="right",
             y=0,
             x=0.5,
             xanchor="center",

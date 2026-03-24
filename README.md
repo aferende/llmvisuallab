@@ -40,20 +40,22 @@ Enter your own sentences (any language, up to 100). The app shows you:
 - All **training pairs** (input token → next token) the model will learn from
 - A **tokenisation mode switch** (see below) to toggle between educational and realistic modes
 
-#### 🔤 Tokenisation Mode Switch — new feature
+#### 🔤 Tokenisation Mode Switch
 
 | Mode | Description |
 |---|---|
 | 📚 **By word** (default) | Every word is a single token. Simple and easy to follow for learning purposes. |
 | 🔬 **Subword BPE** (realistic) | Implements [Byte-Pair Encoding](https://en.wikipedia.org/wiki/Byte_pair_encoding) — the same algorithm used by GPT-2, RoBERTa, LLaMA and Claude. Trained from scratch on your sentences. |
 
-**How BPE works:** starting from individual characters, the algorithm iteratively merges the most frequent adjacent pair until the target vocabulary size is reached. Common words in your corpus become a single token (e.g. `gatto·`); unknown words are decomposed into character-level fragments (e.g. `i` + `n` + `c` + `o` + `m` + `p` + `r` + `en` + `s` + `i` + `b` + `i` + `l` + `e·`). The `·` symbol marks the end of a word.
+Both modes use the **same default training sentences** (auto-translated on language change if not customised). The `·` symbol marks the end of a word in BPE mode.
+
+**How BPE works:** starting from individual characters, the algorithm iteratively merges the most frequent adjacent pair until the target vocabulary size is reached. Common words in your corpus become a single token (e.g. `gatto·`); unknown words are decomposed into character-level fragments (e.g. `i` + `n` + `c` + `o` + `m` + `p` + `r` + `en` + `s` + `i` + `b` + `i` + `l` + `e·`).
 
 > **Why this matters:** real LLMs never tokenise by whole words. Subword BPE handles rare words, neologisms and multilingual text with a compact fixed vocabulary — switching to BPE mode lets you experience this firsthand on your own data.
 
 ### ⚡ Section 2 — Interactive Training
-Click **Start Training** to watch the model learn in real time:
-- **3D Neural Network** — 4 visible layers (Input → Embedding → Hidden → Output). Node colours reflect actual activation values (🔵 blue = inhibited, ⚪ grey = neutral, 🔴 red = excited). The active input token is highlighted in green, the target token in gold.
+Click **Start Training** to watch the model learn in real time — the page automatically scrolls to show the network:
+- **3D Neural Network** — 4 visible layers (Input → Embedding → Hidden → Output). Node colours reflect actual activation values (🔵 blue = inhibited, ⚪ grey = neutral, 🔴 red = excited). The active input token is highlighted in green, the target token in gold. Layer legend displayed on the right side.
 - **Live Loss Curve** — raw instantaneous loss (light background) plus a smoothed rolling-average trend line that shows the model genuinely improving over time
 - **Linux-style terminal console** — step-by-step logs with loss values and gradient norms at each training step
 - **Adjustable hyperparameters** — brain size (hidden neurons 4–64) and number of training steps (10–300)
@@ -61,10 +63,10 @@ Click **Start Training** to watch the model learn in real time:
 ### 🔮 Section 3 — Inference & Semantic Search
 After training, explore what the model has learned:
 - **Next-token prediction** — type any word or phrase; the model shows the top most likely continuations with probability bars
-- **Inference animation** — a 6-step animated 2D network diagram shows how the token travels through Input → Embedding → Hidden → Output. Orange edges = positive weight contributions, blue = negative, green = full path to the top predicted token. Includes a Play button and a step-by-step slider.
+- **Inference animation** — a 6-step animated 2D network diagram shows how the token travels through Input → Embedding → Hidden → Output. Orange edges = positive weight contributions, blue = negative, green = full path to the top predicted token. Play/Pause buttons on the same row; wider layout for readability; embedding node tooltips show the token name and activation value.
 - **Embedding map 2D** — all word vectors projected to 2 dimensions via PCA; semantically related words cluster visibly together
 - **Embedding map 3D** — the same vectors drawn as arrows from the origin (0,0,0) with visible Cartesian axes PC1/PC2/PC3 — exactly like a vector space diagram
-- **Cosine Similarity sphere** — a 3D unit sphere with **all** word vectors as arrows; two selected words are highlighted in 🟢 green and 🔴 red; a golden arc shows the angle θ between them with the cosine value
+- **Cosine Similarity sphere** — a 3D unit sphere with **all** word vectors as arrows; two selected words are highlighted in 🟢 green and 🔴 red; a golden arc shows the angle θ between them with the cosine value; smart default pair (e.g. "cat" vs "eats") auto-selected per language
 - **Semantic search** — rank all training sentences by similarity to your query embedding
 - **Pairwise heatmap** — full cosine similarity matrix between all sentences
 
@@ -75,15 +77,15 @@ After training, explore what the model has learned:
 | Feature | Description |
 |---|---|
 | 📝 Custom dataset | Train on your own sentences (up to 100) |
-| 🔤 Tokenisation mode switch | Toggle between word-level (educational) and BPE subword (realistic) |
-| 🕸️ Real-time 3D network | Live network coloured by actual activation values |
-| ⚡ Interactive training | Adjustable brain size and steps; shuffled-epoch SGD |
+| 🔤 Tokenisation mode switch | Toggle between word-level (educational) and BPE subword (realistic) — same training sentences in both modes |
+| 🕸️ Real-time 3D network | Live network coloured by actual activation values; layer legend on the right; auto-zoom |
+| ⚡ Interactive training | Adjustable brain size and steps; auto-scroll to network on training start |
 | 📉 Loss curve | Raw + smoothed trend — genuine learning visible |
 | 🖥️ Training console | Linux terminal with step-by-step gradient logs |
 | 🌐 Embeddings 2D/3D | PCA projection with Cartesian axes and vector arrows |
-| 🌍 Cosine sphere | 3D unit sphere with all word vectors and angle arc |
+| 🌍 Cosine sphere | 3D unit sphere with all word vectors and angle arc; auto-zoom; smart default word pair |
 | 🔍 Semantic search | Ranked results by embedding similarity |
-| 🎬 Inference animation | 6-step Plotly animation showing token flow through the network with weights and winner path |
+| 🎬 Inference animation | 6-step Plotly animation: wider layout, Play/Pause on same row, embedding tooltips with token+value info |
 | 🌍 Multi-language UI | 7 languages: **English** (default), Italian, French, German, Spanish, Chinese (Simplified), Russian |
 
 ---
