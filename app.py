@@ -28,6 +28,7 @@ from engine.visualization import (
     plot_embeddings_3d,
     plot_cosine_similarity_3d,
     plot_similarity_heatmap,
+    plot_inference_animation,
 )
 from lang import TRANSLATIONS, t as _t
 
@@ -668,13 +669,30 @@ else:
         # Log
         if predictions:
             best_word, best_prob = predictions[0]
-            tok_idx = tokenizer.tokenize(query_text.strip())[-1] if tokenizer.tokenize(query_text.strip()) else 0
+            tok_list = tokenizer.tokenize(query_text.strip())
+            tok_idx = tok_list[-1] if tok_list else 0
             st.session_state.log_lines.append(
                 T("log_infer", token=query_text.split()[-1], idx=tok_idx)
             )
             st.session_state.log_lines.append(
                 T("log_predict", word=best_word, prob=best_prob)
             )
+
+        # ---- Inference animation ------------------------------------
+        if predictions and acts:
+            st.markdown(f"#### 🎬 {T('sec3_anim_title')}")
+            tip(T("sec3_anim_info"))
+            tok_list = tokenizer.tokenize(query_text.strip())
+            anim_idx = tok_list[-1] if tok_list else 0
+            fig_anim = plot_inference_animation(
+                model=model,
+                tokenizer=tokenizer,
+                input_idx=anim_idx,
+                activations=acts,
+                predictions=predictions,
+                lang_labels=TRANSLATIONS[LANG],
+            )
+            st.plotly_chart(fig_anim, width='stretch')
 
     st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
 

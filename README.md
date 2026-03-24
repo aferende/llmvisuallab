@@ -61,6 +61,7 @@ Click **Start Training** to watch the model learn in real time:
 ### 🔮 Section 3 — Inference & Semantic Search
 After training, explore what the model has learned:
 - **Next-token prediction** — type any word or phrase; the model shows the top most likely continuations with probability bars
+- **Inference animation** — a 6-step animated 2D network diagram shows how the token travels through Input → Embedding → Hidden → Output. Orange edges = positive weight contributions, blue = negative, green = full path to the top predicted token. Includes a Play button and a step-by-step slider.
 - **Embedding map 2D** — all word vectors projected to 2 dimensions via PCA; semantically related words cluster visibly together
 - **Embedding map 3D** — the same vectors drawn as arrows from the origin (0,0,0) with visible Cartesian axes PC1/PC2/PC3 — exactly like a vector space diagram
 - **Cosine Similarity sphere** — a 3D unit sphere with **all** word vectors as arrows; two selected words are highlighted in 🟢 green and 🔴 red; a golden arc shows the angle θ between them with the cosine value
@@ -82,7 +83,8 @@ After training, explore what the model has learned:
 | 🌐 Embeddings 2D/3D | PCA projection with Cartesian axes and vector arrows |
 | 🌍 Cosine sphere | 3D unit sphere with all word vectors and angle arc |
 | 🔍 Semantic search | Ranked results by embedding similarity |
-| 🌍 Multi-language UI | 7 languages: English, Italian, French, German, Spanish, Chinese, Russian |
+| 🎬 Inference animation | 6-step Plotly animation showing token flow through the network with weights and winner path |
+| 🌍 Multi-language UI | 7 languages: **English** (default), Italian, French, German, Spanish, Chinese (Simplified), Russian |
 
 ---
 

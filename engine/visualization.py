@@ -853,3 +853,443 @@ def plot_similarity_heatmap(
         height=420,
     )
     return fig
+
+
+# ------------------------------------------------------------------
+# Inference animation
+# ------------------------------------------------------------------
+
+def plot_inference_animation(
+    model: TinyLM,
+    tokenizer,
+    input_idx: int,
+    activations: Dict[str, np.ndarray],
+    predictions: List[Tuple[str, float]],
+    lang_labels: Dict[str, str],
+) -> go.Figure:
+    """
+    6-frame Plotly animation: shows how one token flows through TinyLM.
+
+    Frame 0 — Network at rest
+    Frame 1 — Input token activated (green)
+    Frame 2 — Signal propagates to Embedding layer
+    Frame 3 — Signal propagates to Hidden layer
+    Frame 4 — Signal propagates to Output layer (probabilities appear)
+    Frame 5 — Winner path highlighted in green end-to-end
+
+    Trace layout (7 traces):
+      0  background edges       – static gray lines
+      1  active positive edges  – orange, updated per frame
+      2  active negative edges  – steel-blue, updated per frame
+      3  winner path edges      – green, only in frame 5
+      4  all nodes              – colors/sizes updated per frame
+      5  output probability labels – text, visible in frames 4-5
+      6  input token label      – static, shows the query token
+    """
+    BG   = "rgb(12,14,26)"
+    GRAY = "rgba(80,90,140,0.20)"
+    ORANGE = "rgba(255,140,30,{a})"
+    STEEL  = "rgba(60,130,230,{a})"
+    GREEN  = "rgba(0,230,120,{a})"
+
+    V = model.vocab_size
+    E = model.embed_dim
+    H = model.hidden_size
+    top_k = min(len(predictions), 8)
+    max_in = min(V, 14)
+
+    # ---- activations & weights ----------------------------------------
+    emb_vals = activations["embedding"]   # [E]
+    hid_vals = activations["hidden"]      # [H]
+
+    W_emb = model.W_emb   # [V, E]
+    W_h   = model.W_h     # [E, H]
+    W_out = model.W_out   # [H, V]
+
+    top_words = [w for w, _ in predictions[:top_k]]
+    top_probs = [p for _, p in predictions[:top_k]]
+    top_out_idx = [
+        min(tokenizer.vocab.get(w, 1), V - 1)
+        for w in top_words
+    ]
+
+    # ---- 2-D node positions ------------------------------------------
+    def col_y(n: int) -> List[float]:
+        return list(np.linspace(0.95, 0.05, n)) if n > 1 else [0.5]
+
+    in_y  = col_y(max_in);  in_x  = [0.00] * max_in
+    em_y  = col_y(E);       em_x  = [1.00] * E
+    hd_y  = col_y(H);       hd_x  = [2.00] * H
+    ot_y  = col_y(top_k);   ot_x  = [3.00] * top_k
+
+    # active input position
+    act_in = min(input_idx, max_in - 1)
+
+    # ---- color helpers -----------------------------------------------
+    def _act_color(v: float, alpha: float = 0.9) -> str:
+        t = float(np.clip((v + 1.0) / 2.0, 0, 1))
+        if t < 0.5:
+            s = t * 2
+            r, g, b = int(50 + 150 * s), int(100 + 50 * s), 230
+        else:
+            s = (t - 0.5) * 2
+            r, g, b = 230, int(150 - 100 * s), int(50 + 50 * (1 - s))
+        return f"rgba({r},{g},{b},{alpha:.2f})"
+
+    def _prob_color(p: float) -> str:
+        t = float(np.clip(p * 4, 0, 1))
+        return f"rgba({int(40+80*t)},{int(80+175*t)},{int(60+80*t)},0.92)"
+
+    GRAY_NODE = "rgba(80,90,140,0.45)"
+    GREEN_IN  = "rgba(0,230,130,0.97)"
+    GREEN_WIN = "rgba(30,255,120,1.0)"
+
+    # ---- edge builders -----------------------------------------------
+    def _segs(src_xy, tgt_xy, wmat):
+        """
+        Returns (pos_xs, pos_ys, neg_xs, neg_ys) split by weight sign.
+        wmat shape: [n_src, n_tgt]
+        """
+        pos_x, pos_y, neg_x, neg_y = [], [], [], []
+        if wmat.size == 0:
+            return pos_x, pos_y, neg_x, neg_y
+        mx = float(np.max(np.abs(wmat))) or 1.0
+        threshold = mx * 0.08          # skip near-zero edges for clarity
+        for i, (x0, y0) in enumerate(src_xy):
+            for j, (x1, y1) in enumerate(tgt_xy):
+                w = float(wmat[i, j])
+                if abs(w) < threshold:
+                    continue
+                if w >= 0:
+                    pos_x += [x0, x1, None]; pos_y += [y0, y1, None]
+                else:
+                    neg_x += [x0, x1, None]; neg_y += [y0, y1, None]
+        return pos_x, pos_y, neg_x, neg_y
+
+    def _winner_segs():
+        wx, wy = [], []
+        # in → em (active input only)
+        for j in range(E):
+            wx += [in_x[act_in], em_x[j], None]
+            wy += [in_y[act_in], em_y[j], None]
+        # em → hid
+        for i in range(E):
+            for j in range(H):
+                wx += [em_x[i], hd_x[j], None]
+                wy += [em_y[i], hd_y[j], None]
+        # hid → winner (index 0 in top-k)
+        for i in range(H):
+            wx += [hd_x[i], ot_x[0], None]
+            wy += [hd_y[i], ot_y[0], None]
+        return wx, wy
+
+    # ---- background edges (all connections) --------------------------
+    bg_x, bg_y = [], []
+    # in → em (all)
+    for i in range(max_in):
+        for j in range(E):
+            bg_x += [in_x[i], em_x[j], None]
+            bg_y += [in_y[i], em_y[j], None]
+    # em → hid
+    for i in range(E):
+        for j in range(H):
+            bg_x += [em_x[i], hd_x[j], None]
+            bg_y += [em_y[i], hd_y[j], None]
+    # hid → out top-k
+    for i in range(H):
+        for j in range(top_k):
+            bg_x += [hd_x[i], ot_x[j], None]
+            bg_y += [hd_y[i], ot_y[j], None]
+
+    # ---- node labels -------------------------------------------------
+    in_labels = [tokenizer.idx2word.get(i, "?") for i in range(max_in)]
+    em_labels = [f"e{j}" for j in range(E)]
+    hd_labels = [f"h{j}" for j in range(H)]
+    ot_labels_full = [
+        f"{w}<br>{p * 100:.1f}%" for w, p in zip(top_words, top_probs)
+    ]
+    ot_labels_empty = [""] * top_k
+
+    # ---- per-frame state -----------------------------------------
+    # returns (pos_xs, pos_ys, neg_xs, neg_ys,
+    #          win_xs, win_ys, node_colors, node_sizes,
+    #          node_text, out_label_text)
+    def _frame_state(f: int):
+        # --- default: everything gray, no active edges
+        nc = [GRAY_NODE] * (max_in + E + H + top_k)
+        ns = [7]         * (max_in + E + H + top_k)
+        px, py, nx, ny = [], [], [], []
+        wx, wy = [], []
+        out_txt = ot_labels_empty
+
+        if f >= 1:   # input node active
+            nc[act_in] = GREEN_IN
+            ns[act_in] = 16
+
+        if f >= 2:   # embedding activated
+            w_in_em = W_emb[min(input_idx, V - 1), :].reshape(1, E)
+            px, py, nx, ny = _segs(
+                [(in_x[act_in], in_y[act_in])], list(zip(em_x, em_y)), w_in_em
+            )
+            for j in range(E):
+                nc[max_in + j] = _act_color(float(emb_vals[j]))
+                ns[max_in + j] = 8 + int(abs(float(emb_vals[j])) * 9)
+
+        if f >= 3:   # hidden activated
+            # contribution = diag(emb_vals) @ W_h  →  [E, H]
+            wmat_eh = np.outer(emb_vals, np.ones(H)) * W_h
+            px, py, nx, ny = _segs(
+                list(zip(em_x, em_y)), list(zip(hd_x, hd_y)), wmat_eh
+            )
+            for j in range(H):
+                nc[max_in + E + j] = _act_color(float(hid_vals[j]))
+                ns[max_in + E + j] = 7 + int(abs(float(hid_vals[j])) * 11)
+
+        if f >= 4:   # output activated
+            # contributions: [H, top_k]
+            wmat_ho = np.column_stack([
+                hid_vals * W_out[:, oi] for oi in top_out_idx
+            ])
+            px, py, nx, ny = _segs(
+                list(zip(hd_x, hd_y)), list(zip(ot_x, ot_y)), wmat_ho
+            )
+            for j in range(top_k):
+                nc[max_in + E + H + j] = _prob_color(top_probs[j])
+                ns[max_in + E + H + j] = 9 + int(top_probs[j] * 35)
+            out_txt = ot_labels_full
+
+        if f == 5:   # winner path green
+            wx, wy = _winner_segs()
+            nc[max_in + E + H] = GREEN_WIN
+            ns[max_in + E + H] = 22
+            out_txt = ot_labels_full
+
+        # flatten node positions and labels
+        all_x = in_x + em_x + hd_x + ot_x
+        all_y = in_y + em_y + hd_y + ot_y
+        all_lbl = in_labels + em_labels + hd_labels + out_txt
+
+        return px, py, nx, ny, wx, wy, nc, ns, all_x, all_y, all_lbl
+
+    # ---- build initial (frame 0) state -------------------------------
+    i0 = _frame_state(0)
+    px0, py0, nx0, ny0, wx0, wy0, nc0, ns0, allx0, ally0, lbl0 = i0
+
+    def _empty_trace(color="rgba(0,0,0,0)"):
+        return go.Scatter(x=[], y=[], mode="lines",
+                          line=dict(color=color, width=0),
+                          hoverinfo="none", showlegend=False)
+
+    # ---- build Plotly figure with 7 traces ---------------------------
+    fig = go.Figure(data=[
+        # 0: background edges (static)
+        go.Scatter(
+            x=bg_x, y=bg_y, mode="lines",
+            line=dict(color=GRAY, width=0.5),
+            hoverinfo="none", showlegend=False,
+        ),
+        # 1: active positive edges
+        _empty_trace(ORANGE.format(a=0.0)),
+        # 2: active negative edges
+        _empty_trace(STEEL.format(a=0.0)),
+        # 3: winner path edges
+        _empty_trace(GREEN.format(a=0.0)),
+        # 4: all nodes
+        go.Scatter(
+            x=allx0, y=ally0,
+            mode="markers+text",
+            marker=dict(color=nc0, size=ns0,
+                        line=dict(color="rgba(200,220,255,0.3)", width=0.5)),
+            text=lbl0,
+            textposition="middle right",
+            textfont=dict(size=9, color="rgba(200,220,255,0.85)"),
+            hoverinfo="text",
+            hovertext=lbl0,
+            showlegend=False,
+        ),
+        # 5: output label text only (separate trace for visibility toggle)
+        go.Scatter(
+            x=ot_x, y=ot_y, mode="text",
+            text=ot_labels_empty,
+            textposition="middle right",
+            textfont=dict(size=11, color="rgba(240,240,100,0.95)"),
+            showlegend=False, hoverinfo="none",
+        ),
+        # 6: input token label (static)
+        go.Scatter(
+            x=[in_x[act_in]], y=[in_y[act_in]],
+            mode="text",
+            text=[f"▶ {tokenizer.idx2word.get(input_idx, '?')}"],
+            textposition="middle left",
+            textfont=dict(size=12, color=GREEN_IN),
+            showlegend=False, hoverinfo="none",
+        ),
+    ])
+
+    # ---- animation frames --------------------------------------------
+    frame_names = [
+        "0 — Network",
+        "1 — Input →",
+        "2 — → Embedding",
+        "3 — → Hidden",
+        "4 — → Output",
+        "5 — 🏆 Winner",
+    ]
+
+    frames = []
+    for f in range(6):
+        px, py, nx, ny, wx, wy, nc, ns, ax, ay, lbl = _frame_state(f)
+        _, _, _, _, _, _, _, _, _, _, out_lbl = _frame_state(f)
+        # Extract only the output portion of lbl for trace 5
+        out_lbl_only = lbl[max_in + E + H:]
+
+        frame = go.Frame(
+            name=frame_names[f],
+            traces=[1, 2, 3, 4, 5],
+            data=[
+                # trace 1: positive edges
+                go.Scatter(x=px, y=py, mode="lines",
+                           line=dict(color=ORANGE.format(a=0.75), width=1.8),
+                           hoverinfo="none", showlegend=False),
+                # trace 2: negative edges
+                go.Scatter(x=nx, y=ny, mode="lines",
+                           line=dict(color=STEEL.format(a=0.65), width=1.8),
+                           hoverinfo="none", showlegend=False),
+                # trace 3: winner edges
+                go.Scatter(x=wx, y=wy, mode="lines",
+                           line=dict(color=GREEN.format(a=0.90), width=2.5),
+                           hoverinfo="none", showlegend=False),
+                # trace 4: nodes
+                go.Scatter(
+                    x=ax, y=ay,
+                    mode="markers+text",
+                    marker=dict(color=nc, size=ns,
+                                line=dict(color="rgba(200,220,255,0.3)", width=0.5)),
+                    text=lbl,
+                    textposition="middle right",
+                    textfont=dict(size=9, color="rgba(200,220,255,0.85)"),
+                    hoverinfo="text", hovertext=lbl, showlegend=False,
+                ),
+                # trace 5: output labels
+                go.Scatter(
+                    x=ot_x, y=ot_y, mode="text",
+                    text=out_lbl_only,
+                    textposition="middle right",
+                    textfont=dict(size=11, color="rgba(240,240,100,0.95)"),
+                    showlegend=False, hoverinfo="none",
+                ),
+            ]
+        )
+        frames.append(frame)
+
+    fig.frames = frames
+
+    # ---- layer annotations (static) ----------------------------------
+    for lx, lbl in [(0.0, "Input"), (1.0, "Embedding"), (2.0, "Hidden"), (3.0, "Output")]:
+        fig.add_annotation(
+            x=lx, y=1.03, xref="x", yref="paper",
+            text=f"<b>{lbl}</b>",
+            showarrow=False,
+            font=dict(size=11, color="rgba(167,139,250,0.9)"),
+        )
+
+    # Probability legend annotation
+    fig.add_annotation(
+        x=3.35, y=0.5, xref="x", yref="paper",
+        text=(
+            "<b>% = probability</b><br>"
+            "<span style='color:rgba(255,140,30,0.9)'>─ positive weight</span><br>"
+            "<span style='color:rgba(60,130,230,0.9)'>─ negative weight</span><br>"
+            "<span style='color:rgba(0,230,120,0.9)'>─ winner path</span>"
+        ),
+        showarrow=False, align="left",
+        font=dict(size=9, color="rgba(200,220,255,0.75)"),
+    )
+
+    # ---- animation controls ------------------------------------------
+    slider_steps = [
+        dict(
+            args=[[fn], dict(frame=dict(duration=0, redraw=True), mode="immediate",
+                             transition=dict(duration=0))],
+            label=fn.split("—")[-1].strip(),
+            method="animate",
+        )
+        for fn in frame_names
+    ]
+
+    fig.update_layout(
+        title=dict(
+            text=(
+                f"<b>{lang_labels.get('inference_anim_title', 'Inference Animation')}</b>"
+                f" — input: <b>{tokenizer.idx2word.get(input_idx, '?')}</b>"
+                f" → top: <b>{top_words[0] if top_words else '?'}</b>"
+                f" ({top_probs[0]*100:.1f}%)"
+            ),
+            font=dict(color="rgba(200,220,255,0.95)", size=13),
+            x=0.5,
+        ),
+        paper_bgcolor=BG,
+        plot_bgcolor=BG,
+        font=dict(color="rgba(200,220,255,0.85)", size=10),
+        xaxis=dict(
+            range=[-0.35, 3.85],
+            showgrid=False, zeroline=False, showticklabels=False,
+        ),
+        yaxis=dict(
+            range=[-0.05, 1.1],
+            showgrid=False, zeroline=False, showticklabels=False,
+            scaleanchor="x", scaleratio=3.5,
+        ),
+        height=520,
+        margin=dict(l=20, r=160, t=60, b=80),
+        updatemenus=[dict(
+            type="buttons",
+            showactive=False,
+            y=0,
+            x=0.5,
+            xanchor="center",
+            yanchor="top",
+            buttons=[
+                dict(
+                    label="▶ Play",
+                    method="animate",
+                    args=[None, dict(
+                        frame=dict(duration=1300, redraw=True),
+                        fromcurrent=True,
+                        transition=dict(duration=400, easing="cubic-in-out"),
+                    )],
+                ),
+                dict(
+                    label="⏸ Pause",
+                    method="animate",
+                    args=[[None], dict(
+                        frame=dict(duration=0, redraw=False),
+                        mode="immediate",
+                        transition=dict(duration=0),
+                    )],
+                ),
+            ],
+            font=dict(color="white"),
+            bgcolor="rgba(100,80,200,0.7)",
+            bordercolor="rgba(167,139,250,0.5)",
+        )],
+        sliders=[dict(
+            active=0,
+            steps=slider_steps,
+            x=0.0, len=1.0,
+            y=-0.04,
+            currentvalue=dict(
+                prefix="Step: ",
+                font=dict(color="rgba(200,220,255,0.85)", size=10),
+                visible=True,
+                xanchor="center",
+            ),
+            tickcolor="rgba(200,220,255,0.4)",
+            font=dict(color="rgba(200,220,255,0.6)", size=9),
+            bgcolor="rgba(30,30,60,0.6)",
+            bordercolor="rgba(100,80,200,0.4)",
+            pad=dict(b=10, t=5),
+        )],
+    )
+
+    return fig

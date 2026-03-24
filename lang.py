@@ -167,6 +167,15 @@ TRANSLATIONS = {
         "sec3_query_placeholder": "e.g. the cat",
         "sec3_default_query": "the cat",
         "sec3_btn_infer": "🔮 Run Inference",
+        "sec3_anim_title": "Neural Network — Inference Animation",
+        "sec3_anim_info": (
+            "Press <b>▶ Play</b> to watch the token flow through the network step by step. "
+            "Use the slider to jump to any step. "
+            "<span style='color:rgba(255,140,30,0.9)'>Orange edges</span> = positive weight contribution &nbsp;|&nbsp; "
+            "<span style='color:rgba(60,130,230,0.9)'>Blue edges</span> = negative weight contribution &nbsp;|&nbsp; "
+            "<span style='color:rgba(0,230,120,0.9)'>Green path</span> = route to the top predicted token."
+        ),
+        "inference_anim_title": "Inference Animation",
         "sec3_next_token_title": "🎯 Predicted next tokens",
         "sec3_next_token_info": (
             "These are the tokens the model considers most likely "
@@ -443,6 +452,15 @@ TRANSLATIONS = {
         "sec3_query_placeholder": "es. il gatto",
         "sec3_default_query": "il gatto",
         "sec3_btn_infer": "🔮 Inferenza",
+        "sec3_anim_title": "Rete Neurale — Animazione dell'Inferenza",
+        "sec3_anim_info": (
+            "Premi <b>▶ Play</b> per vedere il token attraversare la rete passo per passo. "
+            "Usa lo slider per saltare a qualsiasi step. "
+            "<span style='color:rgba(255,140,30,0.9)'>Archi arancioni</span> = contributo peso positivo &nbsp;|&nbsp; "
+            "<span style='color:rgba(60,130,230,0.9)'>Archi blu</span> = contributo peso negativo &nbsp;|&nbsp; "
+            "<span style='color:rgba(0,230,120,0.9)'>Percorso verde</span> = cammino verso il token più probabile."
+        ),
+        "inference_anim_title": "Animazione Inferenza",
         "sec3_next_token_title": "🎯 Token successivi predetti",
         "sec3_next_token_info": (
             "Questi sono i token che il modello ritiene più probabili "
@@ -682,6 +700,14 @@ TRANSLATIONS = {
         "sec3_query_placeholder": "ex. le chat",
         "sec3_default_query": "le chat",
         "sec3_btn_infer": "🔮 Lancer l'inférence",
+        "sec3_anim_title": "Réseau de Neurones — Animation de l'Inférence",
+        "sec3_anim_info": (
+            "Appuyez sur <b>▶ Play</b> pour voir le token traverser le réseau étape par étape. "
+            "<span style='color:rgba(255,140,30,0.9)'>Arêtes oranges</span> = poids positif &nbsp;|&nbsp; "
+            "<span style='color:rgba(60,130,230,0.9)'>Arêtes bleues</span> = poids négatif &nbsp;|&nbsp; "
+            "<span style='color:rgba(0,230,120,0.9)'>Chemin vert</span> = route vers le token le plus probable."
+        ),
+        "inference_anim_title": "Animation Inférence",
         "sec3_next_token_title": "🎯 Tokens suivants prédits",
         "sec3_next_token_info": "Les tokens que le modèle considère comme les plus probables.",
         "sec3_emb_title": "🌐 Carte des Embeddings",
@@ -873,6 +899,14 @@ TRANSLATIONS = {
         "sec3_query_placeholder": "z.B. die Katze",
         "sec3_default_query": "die Katze",
         "sec3_btn_infer": "🔮 Inferenz starten",
+        "sec3_anim_title": "Neuronales Netz — Inferenz-Animation",
+        "sec3_anim_info": (
+            "Drücken Sie <b>▶ Play</b>, um den Token Schritt für Schritt durch das Netz zu verfolgen. "
+            "<span style='color:rgba(255,140,30,0.9)'>Orange Kanten</span> = positives Gewicht &nbsp;|&nbsp; "
+            "<span style='color:rgba(60,130,230,0.9)'>Blaue Kanten</span> = negatives Gewicht &nbsp;|&nbsp; "
+            "<span style='color:rgba(0,230,120,0.9)'>Grüner Pfad</span> = Weg zum wahrscheinlichsten Token."
+        ),
+        "inference_anim_title": "Inferenz-Animation",
         "sec3_next_token_title": "🎯 Vorhergesagte nächste Tokens",
         "sec3_next_token_info": "Die Tokens, die das Modell als wahrscheinlichste Fortsetzung betrachtet.",
         "sec3_emb_title": "🌐 Embedding-Karte",
@@ -1062,6 +1096,14 @@ TRANSLATIONS = {
         "sec3_query_placeholder": "ej. el gato",
         "sec3_default_query": "el gato",
         "sec3_btn_infer": "🔮 Inferencia",
+        "sec3_anim_title": "Red Neuronal — Animación de Inferencia",
+        "sec3_anim_info": (
+            "Pulsa <b>▶ Play</b> para ver el token atravesar la red paso a paso. "
+            "<span style='color:rgba(255,140,30,0.9)'>Aristas naranjas</span> = peso positivo &nbsp;|&nbsp; "
+            "<span style='color:rgba(60,130,230,0.9)'>Aristas azules</span> = peso negativo &nbsp;|&nbsp; "
+            "<span style='color:rgba(0,230,120,0.9)'>Camino verde</span> = ruta al token más probable."
+        ),
+        "inference_anim_title": "Animación Inferencia",
         "sec3_next_token_title": "🎯 Tokens siguientes predichos",
         "sec3_next_token_info": "Los tokens que el modelo considera más probables como continuación.",
         "sec3_emb_title": "🌐 Mapa de Embeddings",
@@ -1244,6 +1286,14 @@ TRANSLATIONS = {
         "sec3_query_placeholder": "例如 猫",
         "sec3_default_query": "猫",
         "sec3_btn_infer": "🔮 运行推理",
+        "sec3_anim_title": "神经网络 — 推理动画",
+        "sec3_anim_info": (
+            "按 <b>▶ Play</b> 逐步观看token穿越神经网络的过程。"
+            "<span style='color:rgba(255,140,30,0.9)'>橙色边</span> = 正权重 &nbsp;|&nbsp; "
+            "<span style='color:rgba(60,130,230,0.9)'>蓝色边</span> = 负权重 &nbsp;|&nbsp; "
+            "<span style='color:rgba(0,230,120,0.9)'>绿色路径</span> = 通向最可能token的路径。"
+        ),
+        "inference_anim_title": "推理动画",
         "sec3_next_token_title": "🎯 预测的下一个Token",
         "sec3_next_token_info": "模型认为最可能作为延续的token。",
         "sec3_emb_title": "🌐 嵌入图",
@@ -1428,6 +1478,14 @@ TRANSLATIONS = {
         "sec3_query_placeholder": "напр. кот",
         "sec3_default_query": "кот",
         "sec3_btn_infer": "🔮 Запустить инференс",
+        "sec3_anim_title": "Нейронная Сеть — Анимация Инференса",
+        "sec3_anim_info": (
+            "Нажмите <b>▶ Play</b>, чтобы наблюдать прохождение токена через сеть. "
+            "<span style='color:rgba(255,140,30,0.9)'>Оранжевые рёбра</span> = положительный вес &nbsp;|&nbsp; "
+            "<span style='color:rgba(60,130,230,0.9)'>Синие рёбра</span> = отрицательный вес &nbsp;|&nbsp; "
+            "<span style='color:rgba(0,230,120,0.9)'>Зелёный путь</span> = путь к наиболее вероятному токену."
+        ),
+        "inference_anim_title": "Анимация Инференса",
         "sec3_next_token_title": "🎯 Предсказанные следующие токены",
         "sec3_next_token_info": "Токены, которые модель считает наиболее вероятным продолжением.",
         "sec3_emb_title": "🌐 Карта эмбеддингов",
