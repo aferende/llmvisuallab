@@ -34,11 +34,22 @@ Everything runs on a tiny NumPy model trained on **your own custom sentences** �
 ## Application Sections
 
 ### 📝 Section 1 — Dataset & Tokenisation
-Enter your own sentences (Italian, English or mixed, up to 100). The app shows you:
-- How each word becomes a **numbered token**
+Enter your own sentences (any language, up to 100). The app shows you:
+- How each word (or subword fragment) becomes a **numbered token**
 - The complete **vocabulary** built from your sentences
 - All **training pairs** (input token → next token) the model will learn from
-- A clear note explaining that real models use *subword* tokens (word fragments), while this lab uses whole words for educational clarity
+- A **tokenisation mode switch** (see below) to toggle between educational and realistic modes
+
+#### 🔤 Tokenisation Mode Switch — new feature
+
+| Mode | Description |
+|---|---|
+| 📚 **By word** (default) | Every word is a single token. Simple and easy to follow for learning purposes. |
+| 🔬 **Subword BPE** (realistic) | Implements [Byte-Pair Encoding](https://en.wikipedia.org/wiki/Byte_pair_encoding) — the same algorithm used by GPT-2, RoBERTa, LLaMA and Claude. Trained from scratch on your sentences. |
+
+**How BPE works:** starting from individual characters, the algorithm iteratively merges the most frequent adjacent pair until the target vocabulary size is reached. Common words in your corpus become a single token (e.g. `gatto·`); unknown words are decomposed into character-level fragments (e.g. `i` + `n` + `c` + `o` + `m` + `p` + `r` + `en` + `s` + `i` + `b` + `i` + `l` + `e·`). The `·` symbol marks the end of a word.
+
+> **Why this matters:** real LLMs never tokenise by whole words. Subword BPE handles rare words, neologisms and multilingual text with a compact fixed vocabulary — switching to BPE mode lets you experience this firsthand on your own data.
 
 ### ⚡ Section 2 — Interactive Training
 Click **Start Training** to watch the model learn in real time:
@@ -63,7 +74,7 @@ After training, explore what the model has learned:
 | Feature | Description |
 |---|---|
 | 📝 Custom dataset | Train on your own sentences (up to 100) |
-| 🔬 Tokenisation view | Word-level tokens with vocabulary and index badges |
+| 🔤 Tokenisation mode switch | Toggle between word-level (educational) and BPE subword (realistic) |
 | 🕸️ Real-time 3D network | Live network coloured by actual activation values |
 | ⚡ Interactive training | Adjustable brain size and steps; shuffled-epoch SGD |
 | 📉 Loss curve | Raw + smoothed trend — genuine learning visible |
@@ -71,7 +82,7 @@ After training, explore what the model has learned:
 | 🌐 Embeddings 2D/3D | PCA projection with Cartesian axes and vector arrows |
 | 🌍 Cosine sphere | 3D unit sphere with all word vectors and angle arc |
 | 🔍 Semantic search | Ranked results by embedding similarity |
-| 🌍 Multi-language UI | Full Italian / English (Italian default) |
+| 🌍 Multi-language UI | 7 languages: English, Italian, French, German, Spanish, Chinese, Russian |
 
 ---
 

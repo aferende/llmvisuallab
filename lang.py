@@ -63,9 +63,39 @@ TRANSLATIONS = {
         "sec1_title": "📝 Section 1 — Dataset & Tokenisation",
         "sec1_intro": (
             "Enter the sentences you want to use to train the model. "
-            "One sentence per line. You can use Italian, English or both! "
+            "One sentence per line. You can use any language! "
             "(max 100 sentences)"
         ),
+        "tokenizer_mode_label": "🔤 Tokenization mode:",
+        "tokenizer_mode_word": "📚 By word (educational)",
+        "tokenizer_mode_subword": "🔬 Subword BPE (realistic)",
+        "tokenizer_mode_word_info": (
+            "📚 <b>Word-level mode (educational default):</b> each word is treated as a single token. "
+            "This simplification makes it easy to follow every step of training and inference. "
+            "<b>Important:</b> real LLMs do <i>not</i> work this way — switch to "
+            "<b>Subword BPE</b> mode to see how tokens actually work in models like GPT and Claude."
+        ),
+        "tokenizer_mode_subword_info": (
+            "🔬 <b>Subword BPE mode (realistic):</b> this lab now uses <b>Byte-Pair Encoding (BPE)</b>, "
+            "the same algorithm used by GPT-2, RoBERTa, LLaMA, and Claude. "
+            "BPE starts from individual characters and iteratively merges the most frequent adjacent pair "
+            "until the target vocabulary size is reached. "
+            "Result: common words become one token (<code>cat·</code>), "
+            "rare words are split into fragments (<code>un</code> + <code>believ</code> + <code>able·</code>). "
+            "The <b>·</b> symbol marks the end of a word."
+        ),
+        "sec1_vocab_info_subword": (
+            "Each unique <b>subword fragment</b> from BPE becomes a token with a unique index. "
+            "The <b>·</b> symbol marks the end of a word. "
+            "BPE performed <b>{merges} merges</b> on this corpus."
+        ),
+        "sec1_pairs_info_subword": (
+            "Training pairs are now at the <b>subword level</b>: the model learns to predict "
+            "the next subword fragment given the current one. "
+            "This is exactly how real LLMs are trained."
+        ),
+        "sec1_warn_min": "⚠️ Please enter at least 2 sentences.",
+        "sec1_warn_max": "⚠️ Maximum 100 sentences allowed ({n} entered).",
         "token_reality_note": (
             "⚠️ <b>Educational note on tokens:</b> In real models (GPT, Claude, etc.) "
             "a token is <b>not a whole word</b> but a <b>word fragment</b> (subword). "
@@ -73,8 +103,7 @@ TRANSLATIONS = {
             "<code>un</code> + <code>believ</code> + <code>able</code>. "
             "This lets models handle rare words, neologisms and multiple languages "
             "with a fixed vocabulary. "
-            "In this lab we use <b>one word = one token</b> for educational simplicity, "
-            "so every step is easy to follow."
+            "Use the <b>Subword BPE</b> mode above to experience real tokenization."
         ),
         "sec1_input_label": "Training sentences (one per line):",
         "sec1_default_sentences": (
@@ -310,9 +339,39 @@ TRANSLATIONS = {
         "sec1_title": "📝 Sezione 1 — Dataset e Tokenizzazione",
         "sec1_intro": (
             "Inserisci le frasi che vuoi usare per addestrare il modello. "
-            "Una frase per riga. Puoi usare italiano, inglese o entrambi! "
+            "Una frase per riga. Puoi usare qualsiasi lingua! "
             "(massimo 100 frasi)"
         ),
+        "tokenizer_mode_label": "🔤 Modalità di tokenizzazione:",
+        "tokenizer_mode_word": "📚 Per parola (didattica)",
+        "tokenizer_mode_subword": "🔬 Sottoparola BPE (realistica)",
+        "tokenizer_mode_word_info": (
+            "📚 <b>Modalità per parola (default didattico):</b> ogni parola è trattata come un unico token. "
+            "Questa semplificazione rende più facile seguire ogni fase del training e dell'inferenza. "
+            "<b>Importante:</b> gli LLM reali <i>non</i> funzionano così — passa alla modalità "
+            "<b>Sottoparola BPE</b> per vedere come funzionano davvero i token in modelli come GPT e Claude."
+        ),
+        "tokenizer_mode_subword_info": (
+            "🔬 <b>Modalità Sottoparola BPE (realistica):</b> il laboratorio usa ora il <b>Byte-Pair Encoding (BPE)</b>, "
+            "lo stesso algoritmo di GPT-2, RoBERTa, LLaMA e Claude. "
+            "BPE parte dai singoli caratteri e unisce iterativamente la coppia adiacente più frequente "
+            "fino a raggiungere la dimensione target del vocabolario. "
+            "Risultato: le parole comuni diventano un solo token (<code>gatto·</code>), "
+            "quelle rare vengono spezzate (<code>in</code> + <code>comprens</code> + <code>ibile·</code>). "
+            "Il simbolo <b>·</b> indica la fine di una parola."
+        ),
+        "sec1_vocab_info_subword": (
+            "Ogni <b>frammento di sottoparola</b> prodotto dal BPE diventa un token con indice unico. "
+            "Il simbolo <b>·</b> indica la fine di una parola. "
+            "BPE ha eseguito <b>{merges} fusioni</b> su questo corpus."
+        ),
+        "sec1_pairs_info_subword": (
+            "Le coppie di training sono ora al livello <b>sottoparola</b>: il modello impara a predire "
+            "il prossimo frammento dato quello corrente. "
+            "Esattamente come avviene negli LLM reali."
+        ),
+        "sec1_warn_min": "⚠️ Inserisci almeno 2 frasi.",
+        "sec1_warn_max": "⚠️ Massimo 100 frasi consentite ({n} inserite).",
         "token_reality_note": (
             "⚠️ <b>Nota didattica sui token:</b> Nei modelli reali (GPT, Claude, ecc.) "
             "un token <b>non è una parola intera</b>, ma un <b>frammento di parola</b> "
@@ -320,8 +379,7 @@ TRANSLATIONS = {
             "3 token: <code>in</code> + <code>comprens</code> + <code>ibile</code>. "
             "Questo consente di gestire parole rare, neologismi e lingue diverse con un "
             "vocabolario limitato. "
-            "In questo laboratorio usiamo invece <b>una parola = un token</b> "
-            "per semplicità didattica, così è più facile seguire ogni passaggio."
+            "Usa la modalità <b>Sottoparola BPE</b> qui sopra per vivere la tokenizzazione reale."
         ),
         "sec1_input_label": "Frasi di training (una per riga):",
         "sec1_default_sentences": (
@@ -550,16 +608,38 @@ TRANSLATIONS = {
         ),
         "sec1_title": "📝 Section 1 — Jeu de données & Tokenisation",
         "sec1_intro": (
-            "Entrez les phrases que vous souhaitez utiliser pour entraîner le modèle. "
-            "Une phrase par ligne. Vous pouvez utiliser l'italien, l'anglais ou les deux ! "
-            "(max 100 phrases)"
+            "Entrez les phrases pour entraîner le modèle. "
+            "Une phrase par ligne. Toute langue acceptée ! (max 100 phrases)"
         ),
+        "tokenizer_mode_label": "🔤 Mode de tokenisation :",
+        "tokenizer_mode_word": "📚 Par mot (éducatif)",
+        "tokenizer_mode_subword": "🔬 Sous-mot BPE (réaliste)",
+        "tokenizer_mode_word_info": (
+            "📚 <b>Mode par mot (défaut éducatif) :</b> chaque mot est un token. "
+            "Simplification didactique — les vrais LLM utilisent des sous-mots. "
+            "Passez au mode <b>Sous-mot BPE</b> pour voir la tokenisation réelle."
+        ),
+        "tokenizer_mode_subword_info": (
+            "🔬 <b>Mode Sous-mot BPE (réaliste) :</b> utilise le <b>Byte-Pair Encoding</b>, "
+            "l'algorithme de GPT-2, LLaMA et Claude. BPE part des caractères et fusionne "
+            "itérativement la paire la plus fréquente. Le symbole <b>·</b> marque la fin d'un mot."
+        ),
+        "sec1_vocab_info_subword": (
+            "Chaque <b>fragment de sous-mot</b> BPE devient un token unique. "
+            "Le <b>·</b> marque la fin d'un mot. BPE a effectué <b>{merges} fusions</b>."
+        ),
+        "sec1_pairs_info_subword": (
+            "Les paires d'entraînement sont au niveau <b>sous-mot</b> : "
+            "le modèle prédit le prochain fragment, comme les vrais LLM."
+        ),
+        "sec1_warn_min": "⚠️ Entrez au moins 2 phrases.",
+        "sec1_warn_max": "⚠️ Maximum 100 phrases ({n} entrées).",
         "token_reality_note": (
             "⚠️ <b>Note pédagogique sur les tokens :</b> Dans les vrais modèles (GPT, Claude, etc.) "
             "un token n'est <b>pas un mot entier</b> mais un <b>fragment de mot</b> (sous-mot). "
             "Par exemple <i>incompréhensible</i> peut devenir 3 tokens : "
             "<code>in</code> + <code>compréhen</code> + <code>sible</code>. "
-            "Dans ce laboratoire, nous utilisons <b>un mot = un token</b> pour simplifier."
+            "Utilisez le mode <b>Sous-mot BPE</b> ci-dessus pour l'expérimenter."
         ),
         "sec1_input_label": "Phrases d'entraînement (une par ligne) :",
         "sec1_default_sentences": (
@@ -723,13 +803,34 @@ TRANSLATIONS = {
         ),
         "sec1_title": "📝 Abschnitt 1 — Datensatz & Tokenisierung",
         "sec1_intro": (
-            "Geben Sie die Sätze ein, die Sie zum Training verwenden möchten. "
-            "Ein Satz pro Zeile. (max. 100 Sätze)"
+            "Geben Sie Sätze ein. Ein Satz pro Zeile. Jede Sprache erlaubt! (max. 100)"
         ),
+        "tokenizer_mode_label": "🔤 Tokenisierungsmodus:",
+        "tokenizer_mode_word": "📚 Nach Wort (didaktisch)",
+        "tokenizer_mode_subword": "🔬 Teilwort BPE (realistisch)",
+        "tokenizer_mode_word_info": (
+            "📚 <b>Wortmodus (didaktischer Standard):</b> jedes Wort ist ein Token. "
+            "Vereinfachung — echte LLMs verwenden Teilwörter. "
+            "Wechseln Sie zu <b>Teilwort BPE</b> für die echte Tokenisierung."
+        ),
+        "tokenizer_mode_subword_info": (
+            "🔬 <b>Teilwort-BPE-Modus (realistisch):</b> verwendet <b>Byte-Pair Encoding</b>, "
+            "den Algorithmus von GPT-2, LLaMA und Claude. BPE beginnt mit Zeichen und fusioniert "
+            "das häufigste Paar iterativ. Das Symbol <b>·</b> markiert das Wortende."
+        ),
+        "sec1_vocab_info_subword": (
+            "Jedes <b>Teilwort-Fragment</b> wird ein eindeutiger Token. "
+            "<b>·</b> markiert das Wortende. BPE führte <b>{merges} Fusionen</b> durch."
+        ),
+        "sec1_pairs_info_subword": (
+            "Trainingspaare sind jetzt auf <b>Teilwort-Ebene</b> — wie in echten LLMs."
+        ),
+        "sec1_warn_min": "⚠️ Bitte mindestens 2 Sätze eingeben.",
+        "sec1_warn_max": "⚠️ Maximal 100 Sätze erlaubt ({n} eingegeben).",
         "token_reality_note": (
             "⚠️ <b>Didaktischer Hinweis zu Tokens:</b> In echten Modellen (GPT, Claude usw.) "
             "ist ein Token <b>kein ganzes Wort</b>, sondern ein <b>Wortfragment</b> (Subword). "
-            "In diesem Labor verwenden wir <b>ein Wort = ein Token</b> zur Vereinfachung."
+            "Nutzen Sie den <b>Teilwort-BPE</b>-Modus oben, um es selbst zu erleben."
         ),
         "sec1_input_label": "Trainingssätze (einer pro Zeile):",
         "sec1_default_sentences": (
@@ -893,13 +994,32 @@ TRANSLATIONS = {
         ),
         "sec1_title": "📝 Sección 1 — Dataset y Tokenización",
         "sec1_intro": (
-            "Introduce las frases que quieres usar para entrenar el modelo. "
-            "Una frase por línea. (máx. 100 frases)"
+            "Introduce las frases para entrenar el modelo. Una por línea. (máx. 100)"
         ),
+        "tokenizer_mode_label": "🔤 Modo de tokenización:",
+        "tokenizer_mode_word": "📚 Por palabra (educativo)",
+        "tokenizer_mode_subword": "🔬 Subpalabra BPE (realista)",
+        "tokenizer_mode_word_info": (
+            "📚 <b>Modo por palabra (predeterminado educativo):</b> cada palabra es un token. "
+            "Los LLM reales usan subpalabras. Cambia a <b>Subpalabra BPE</b> para ver cómo funciona de verdad."
+        ),
+        "tokenizer_mode_subword_info": (
+            "🔬 <b>Modo Subpalabra BPE (realista):</b> usa <b>Byte-Pair Encoding</b>, "
+            "el algoritmo de GPT-2, LLaMA y Claude. El símbolo <b>·</b> indica el fin de una palabra."
+        ),
+        "sec1_vocab_info_subword": (
+            "Cada <b>fragmento de subpalabra</b> BPE es un token único. "
+            "<b>·</b> indica el fin de palabra. BPE realizó <b>{merges} fusiones</b>."
+        ),
+        "sec1_pairs_info_subword": (
+            "Los pares de entrenamiento están al nivel <b>subpalabra</b>, como en los LLM reales."
+        ),
+        "sec1_warn_min": "⚠️ Introduce al menos 2 frases.",
+        "sec1_warn_max": "⚠️ Máximo 100 frases ({n} introducidas).",
         "token_reality_note": (
             "⚠️ <b>Nota didáctica sobre tokens:</b> En modelos reales (GPT, Claude, etc.) "
             "un token <b>no es una palabra completa</b> sino un <b>fragmento de palabra</b> (subword). "
-            "En este laboratorio usamos <b>una palabra = un token</b> para simplificar."
+            "Usa el modo <b>Subpalabra BPE</b> de arriba para experimentarlo."
         ),
         "sec1_input_label": "Frases de entrenamiento (una por línea):",
         "sec1_default_sentences": (
@@ -1059,11 +1179,29 @@ TRANSLATIONS = {
             "<b>余弦相似度</b>衡量两个向量&ldquo;指向同一方向&rdquo;的程度：越接近1，词越相似。"
         ),
         "sec1_title": "📝 第1节 — 数据集与分词",
-        "sec1_intro": "输入您想用于训练模型的句子。每行一句。（最多100句）",
+        "sec1_intro": "输入训练句子，每行一句。（最多100句）",
+        "tokenizer_mode_label": "🔤 分词模式：",
+        "tokenizer_mode_word": "📚 按词（教学）",
+        "tokenizer_mode_subword": "🔬 子词 BPE（真实）",
+        "tokenizer_mode_word_info": (
+            "📚 <b>按词模式（教学默认）：</b>每个词是一个token。"
+            "真实LLM使用子词分词。切换到 <b>子词BPE</b> 模式查看真实效果。"
+        ),
+        "tokenizer_mode_subword_info": (
+            "🔬 <b>子词BPE模式（真实）：</b>使用 <b>Byte-Pair Encoding</b>，"
+            "GPT-2、LLaMA和Claude使用的算法。<b>·</b> 符号标记词的结尾。"
+        ),
+        "sec1_vocab_info_subword": (
+            "每个BPE<b>子词片段</b>都是唯一的token。<b>·</b>标记词尾。"
+            "BPE执行了<b>{merges}次合并</b>。"
+        ),
+        "sec1_pairs_info_subword": "训练对在<b>子词级别</b>，与真实LLM一致。",
+        "sec1_warn_min": "⚠️ 请至少输入2个句子。",
+        "sec1_warn_max": "⚠️ 最多100个句子（已输入 {n} 个）。",
         "token_reality_note": (
             "⚠️ <b>关于Token的教学说明：</b>在真实模型（GPT、Claude等）中，"
             "一个token<b>不是完整的词</b>，而是<b>词的片段</b>（子词）。"
-            "本实验室使用<b>一词 = 一token</b>来简化教学。"
+            "使用上方的 <b>子词BPE</b> 模式来亲身体验真实分词。"
         ),
         "sec1_input_label": "训练句子（每行一句）：",
         "sec1_default_sentences": (
@@ -1225,14 +1363,29 @@ TRANSLATIONS = {
             "<b>Косинусное сходство</b> измеряет, насколько два вектора \"указывают в одну сторону\"."
         ),
         "sec1_title": "📝 Раздел 1 — Датасет и Токенизация",
-        "sec1_intro": (
-            "Введите предложения для обучения модели. "
-            "По одному предложению на строку. (макс. 100 предложений)"
+        "sec1_intro": "Введите предложения для обучения. По одному на строку. (макс. 100)",
+        "tokenizer_mode_label": "🔤 Режим токенизации:",
+        "tokenizer_mode_word": "📚 По словам (учебный)",
+        "tokenizer_mode_subword": "🔬 Подслово BPE (реалистичный)",
+        "tokenizer_mode_word_info": (
+            "📚 <b>Пословный режим (учебный по умолчанию):</b> каждое слово — один токен. "
+            "Реальные LLM используют подслова. Переключитесь на <b>Подслово BPE</b> для реальной токенизации."
         ),
+        "tokenizer_mode_subword_info": (
+            "🔬 <b>Режим Подслово BPE (реалистичный):</b> использует <b>Byte-Pair Encoding</b>, "
+            "алгоритм GPT-2, LLaMA и Claude. Символ <b>·</b> обозначает конец слова."
+        ),
+        "sec1_vocab_info_subword": (
+            "Каждый <b>фрагмент подслова</b> BPE — уникальный токен. "
+            "<b>·</b> — конец слова. BPE выполнил <b>{merges} слияний</b>."
+        ),
+        "sec1_pairs_info_subword": "Пары обучения на уровне <b>подслов</b>, как в реальных LLM.",
+        "sec1_warn_min": "⚠️ Введите не менее 2 предложений.",
+        "sec1_warn_max": "⚠️ Максимум 100 предложений (введено {n}).",
         "token_reality_note": (
             "⚠️ <b>Учебная заметка о токенах:</b> В реальных моделях (GPT, Claude и др.) "
             "токен — это <b>не целое слово</b>, а <b>фрагмент слова</b> (подслово). "
-            "В этой лаборатории мы используем <b>одно слово = один токен</b> для упрощения."
+            "Используйте режим <b>Подслово BPE</b> выше, чтобы увидеть это."
         ),
         "sec1_input_label": "Обучающие предложения (по одному на строку):",
         "sec1_default_sentences": (

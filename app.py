@@ -9,7 +9,7 @@ import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
 
-from engine.tokenizer import Tokenizer
+from engine.tokenizer import Tokenizer, SubwordTokenizer
 from engine.model import TinyLM
 from engine.training import train
 from engine.inference import (
@@ -65,6 +65,7 @@ load_css()
 def init_state() -> None:
     defaults = {
         "lang": "en",
+        "tokenizer_mode": "word",   # "word" | "subword"
         "tokenizer": None,
         "model": None,
         "trained": False,
@@ -308,6 +309,32 @@ st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
 
 section_header(T("sec1_title"))
 tip(T("sec1_intro"))
+
+# ---- Tokenizer mode toggle ----
+mode_options = [T("tokenizer_mode_word"), T("tokenizer_mode_subword")]
+mode_idx = 0 if st.session_state.tokenizer_mode == "word" else 1
+chosen_mode_label = st.radio(
+    T("tokenizer_mode_label"),
+    mode_options,
+    index=mode_idx,
+    horizontal=True,
+    key="mode_radio",
+)
+new_mode = "word" if chosen_mode_label == T("tokenizer_mode_word") else "subword"
+if new_mode != st.session_state.tokenizer_mode:
+    st.session_state.tokenizer_mode = new_mode
+    st.session_state.dataset_ready = False
+    st.session_state.trained = False
+    st.session_state.model = None
+    st.session_state.loss_history = []
+    st.session_state.log_lines = []
+    st.rerun()
+
+if st.session_state.tokenizer_mode == "word":
+    tip(T("tokenizer_mode_word_info"))
+else:
+    tip(T("tokenizer_mode_subword_info"))
+
 tip(T("token_reality_note"))
 
 raw_input = st.text_area(
@@ -323,14 +350,14 @@ if btn_tokenize or st.session_state.dataset_ready:
     sentences = [s.strip() for s in raw_input.strip().splitlines() if s.strip()]
 
     if len(sentences) < 2:
-        st.warning("Please enter at least 2 sentences.")
+        st.warning(T("sec1_warn_min"))
     elif len(sentences) > 100:
-        st.error(
-            f"Maximum 100 sentences allowed. "
-            f"({len(sentences)} entered)"
-        )
+        st.error(T("sec1_warn_max", n=len(sentences)))
     else:
-        tokenizer = Tokenizer()
+        if st.session_state.tokenizer_mode == "subword":
+            tokenizer = SubwordTokenizer(target_vocab_size=80)
+        else:
+            tokenizer = Tokenizer()
         tokenizer.fit(sentences)
         pairs = tokenizer.get_training_pairs(sentences)
 
@@ -338,7 +365,6 @@ if btn_tokenize or st.session_state.dataset_ready:
         st.session_state.sentences = sentences
         st.session_state.pairs = pairs
         st.session_state.dataset_ready = True
-        # Reset model if sentences changed
         if btn_tokenize:
             st.session_state.trained = False
             st.session_state.model = None
@@ -347,38 +373,49 @@ if btn_tokenize or st.session_state.dataset_ready:
 
         # ---- Vocabulary ----
         st.markdown(f"#### {T('sec1_vocab_title')}")
-        tip(T("sec1_vocab_info"))
+        if st.session_state.tokenizer_mode == "subword":
+            tip(T("sec1_vocab_info_subword",
+                  merges=getattr(tokenizer, "n_merges_done", 0)))
+        else:
+            tip(T("sec1_vocab_info"))
 
-        # Show vocabulary table
         special = {tokenizer.PAD, tokenizer.UNK}
+        _eow_raw = getattr(tokenizer, "_EOW", None)
+        _eow_disp = getattr(tokenizer, "_EOW_DISPLAY", "·")
         vocab_words = sorted(
             [(w, i) for w, i in tokenizer.vocab.items() if w not in special],
             key=lambda x: x[1],
         )
-
-        # Render as token badges
         badges = "".join(
-            f'<span class="token-badge">{w} <span class="idx">#{i}</span></span>'
+            f'<span class="token-badge">'
+            f'{(w.replace(_eow_raw, _eow_disp) if _eow_raw else w)} '
+            f'<span class="idx">#{i}</span></span>'
             for w, i in vocab_words
         )
-        st.markdown(
-            f'<div style="line-height:2.2;">{badges}</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown(f'<div style="line-height:2.2;">{badges}</div>',
+                    unsafe_allow_html=True)
         st.caption(f"📊 Vocab size: **{tokenizer.vocab_size}** tokens "
                    f"(including {tokenizer.PAD} and {tokenizer.UNK})")
 
         # ---- Training pairs ----
         st.markdown(f"#### {T('sec1_pairs_title')}")
-        tip(T("sec1_pairs_info"))
+        if st.session_state.tokenizer_mode == "subword":
+            tip(T("sec1_pairs_info_subword"))
+        else:
+            tip(T("sec1_pairs_info"))
         pair_cols = st.columns(min(4, len(pairs)))
         for i, (inp, tgt) in enumerate(pairs[:16]):
             col = pair_cols[i % len(pair_cols)]
-            col.markdown(
-                f"`{tokenizer.idx2word[inp]}` → `{tokenizer.idx2word[tgt]}`"
-            )
+            w_in = tokenizer.idx2word[inp]
+            w_tgt = tokenizer.idx2word[tgt]
+            if st.session_state.tokenizer_mode == "subword":
+                eow = getattr(tokenizer, "_EOW", "</w>")
+                disp = getattr(tokenizer, "_EOW_DISPLAY", "·")
+                w_in = w_in.replace(eow, disp)
+                w_tgt = w_tgt.replace(eow, disp)
+            col.markdown(f"`{w_in}` → `{w_tgt}`")
         if len(pairs) > 16:
-            st.caption(f"... and {len(pairs) - 16} more pairs")
+            st.caption(f"... +{len(pairs) - 16}")
 
         # ---- Per-sentence tokenisation ----
         with st.expander(T("sec1_tokenization_title"), expanded=True):
@@ -388,10 +425,7 @@ if btn_tokenize or st.session_state.dataset_ready:
                     f'<span class="token-badge">{w} <span class="idx">#{i}</span></span>'
                     for w, i in tok_pairs
                 )
-                st.markdown(
-                    f"**{sent}** → {badges_s}",
-                    unsafe_allow_html=True,
-                )
+                st.markdown(f"**{sent}** → {badges_s}", unsafe_allow_html=True)
 
 st.markdown('<hr class="custom-divider">', unsafe_allow_html=True)
 
