@@ -132,7 +132,8 @@ def plot_3d_network(
     add_edge_trace(bg_pairs_ho, "rgba(80,100,180,0.08)", 0.8)
 
     # Active path: input_idx → its embedding connections (W_emb row)
-    in_node = pos_in[min(input_idx, max_vocab_display - 1)]
+    in_pos = display_in_idxs.index(input_idx) if input_idx in display_in_idxs else 0
+    in_node = pos_in[in_pos]
     active_emb_pairs = [(in_node, pos_em[e]) for e in range(embed_dim)]
     add_edge_trace(active_emb_pairs, "rgba(0,200,255,0.55)", 2.0, "Input→Emb")
 
@@ -258,7 +259,7 @@ def plot_3d_network(
     for i, (lname, ldesc, lcolor) in enumerate(layer_defs):
         fig.add_annotation(
             xref="paper", yref="paper",
-            x=1.02, y=0.92 - i * 0.22,
+            x=0.82, y=0.88 - i * 0.22,
             text=f"<b>{lname}</b><br>"
                  f"<span style='font-size:9px;color:rgba(180,200,240,0.6)'>{ldesc}</span>",
             showarrow=False,
@@ -287,9 +288,10 @@ def plot_3d_network(
             yaxis=dict(visible=False),
             zaxis=dict(visible=False),
             camera=dict(eye=dict(x=1.1, y=-0.85, z=0.55)),
+            domain=dict(x=[0.0, 0.78], y=[0.0, 1.0]),
         ),
         paper_bgcolor=bg,
-        margin=dict(l=0, r=180, t=50, b=0),
+        margin=dict(l=0, r=0, t=50, b=0),
         height=510,
     )
 
