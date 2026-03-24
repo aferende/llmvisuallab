@@ -195,17 +195,21 @@ with st.sidebar:
     new_lang = lang_options[selected_lang_name]
     if new_lang != st.session_state.lang:
         # Auto-swap default sentences if user hasn't customised them
-        old_sent_default = _t("sec1_default_sentences", st.session_state.lang)
+        # Use BPE-specific defaults when in subword mode
+        _mode = st.session_state.tokenizer_mode
+        _sent_key = "sec1_default_sentences_bpe" if _mode == "subword" else "sec1_default_sentences"
+        _query_key = "sec3_default_query_bpe" if _mode == "subword" else "sec3_default_query"
+
+        old_sent_default = _t(_sent_key, st.session_state.lang)
         current_sents = st.session_state.get("raw_sentences", old_sent_default)
         if current_sents.strip() == old_sent_default.strip():
-            st.session_state["raw_sentences"] = _t("sec1_default_sentences", new_lang)
+            st.session_state["raw_sentences"] = _t(_sent_key, new_lang)
             st.session_state.dataset_ready = False
 
-        # Auto-swap default inference query if user hasn't customised it
-        old_query_default = _t("sec3_default_query", st.session_state.lang)
+        old_query_default = _t(_query_key, st.session_state.lang)
         current_query = st.session_state.get("infer_query", old_query_default)
         if current_query.strip() == old_query_default.strip():
-            st.session_state["infer_query"] = _t("sec3_default_query", new_lang)
+            st.session_state["infer_query"] = _t(_query_key, new_lang)
 
         st.session_state.lang = new_lang
         st.rerun()
@@ -323,6 +327,23 @@ chosen_mode_label = st.radio(
 )
 new_mode = "word" if chosen_mode_label == T("tokenizer_mode_word") else "subword"
 if new_mode != st.session_state.tokenizer_mode:
+    # Auto-swap default sentences if user hasn't customised them
+    old_mode = st.session_state.tokenizer_mode
+    old_sent_key = "sec1_default_sentences_bpe" if old_mode == "subword" else "sec1_default_sentences"
+    new_sent_key = "sec1_default_sentences_bpe" if new_mode == "subword" else "sec1_default_sentences"
+    old_sent_default = _t(old_sent_key, LANG)
+    current_sents = st.session_state.get("raw_sentences", old_sent_default)
+    if current_sents.strip() == old_sent_default.strip():
+        st.session_state["raw_sentences"] = _t(new_sent_key, LANG)
+
+    # Auto-swap default inference query if user hasn't customised it
+    old_query_key = "sec3_default_query_bpe" if old_mode == "subword" else "sec3_default_query"
+    new_query_key = "sec3_default_query_bpe" if new_mode == "subword" else "sec3_default_query"
+    old_q_default = _t(old_query_key, LANG)
+    current_q = st.session_state.get("infer_query", old_q_default)
+    if current_q.strip() == old_q_default.strip():
+        st.session_state["infer_query"] = _t(new_query_key, LANG)
+
     st.session_state.tokenizer_mode = new_mode
     st.session_state.dataset_ready = False
     st.session_state.trained = False
@@ -338,9 +359,14 @@ else:
 
 tip(T("token_reality_note"))
 
+_default_sents = (
+    T("sec1_default_sentences_bpe")
+    if st.session_state.tokenizer_mode == "subword"
+    else T("sec1_default_sentences")
+)
 raw_input = st.text_area(
     T("sec1_input_label"),
-    value=T("sec1_default_sentences"),
+    value=_default_sents,
     height=160,
     key="raw_sentences",
 )
@@ -642,6 +668,16 @@ else:
     sentences = st.session_state.sentences
     lang_labels = TRANSLATIONS[LANG]
 
+    # BPE display helpers: replace internal </w> marker with visible · symbol
+    _eow = getattr(tokenizer, "_EOW", None)
+    _eow_disp = getattr(tokenizer, "_EOW_DISPLAY", "·")
+
+    def _disp(tok: str) -> str:
+        return tok.replace(_eow, _eow_disp) if _eow else tok
+
+    def _to_raw(display_tok: str) -> str:
+        return display_tok.replace(_eow_disp, _eow) if _eow else display_tok
+
     # ----------------------------------------------------------------
     # 3A: Next-token prediction
     # ----------------------------------------------------------------
@@ -662,13 +698,15 @@ else:
         predictions, acts = predict_next_tokens(
             model, tokenizer, query_text.strip(), top_k=6
         )
+        # Replace internal EOW marker with display character for BPE mode
+        predictions_disp = [(_disp(w), p) for w, p in predictions]
         with inf_col2:
             st.markdown(f"**Input:** `{query_text}`")
-            prediction_bars(predictions)
+            prediction_bars(predictions_disp)
 
         # Log
-        if predictions:
-            best_word, best_prob = predictions[0]
+        if predictions_disp:
+            best_word, best_prob = predictions_disp[0]
             tok_list = tokenizer.tokenize(query_text.strip())
             tok_idx = tok_list[-1] if tok_list else 0
             st.session_state.log_lines.append(
@@ -689,7 +727,7 @@ else:
                 tokenizer=tokenizer,
                 input_idx=anim_idx,
                 activations=acts,
-                predictions=predictions,
+                predictions=predictions_disp,
                 lang_labels=TRANSLATIONS[LANG],
             )
             st.plotly_chart(fig_anim, width='stretch')
@@ -704,6 +742,9 @@ else:
     tip(T("dataset_tip_semantic"))
 
     embeddings, labels = get_token_embeddings(model, tokenizer)
+    # Replace internal EOW marker in labels for display
+    if _eow:
+        labels = [_disp(lb) for lb in labels]
 
     # Optional query overlay
     query_emb_for_viz = None
@@ -740,7 +781,7 @@ else:
     tip(T("sec3_cos_info"))
 
     vocab_words = sorted(
-        [w for w in tokenizer.vocab if w not in {tokenizer.PAD, tokenizer.UNK}]
+        [_disp(w) for w in tokenizer.vocab if w not in {tokenizer.PAD, tokenizer.UNK}]
     )
 
     cos_col1, cos_col2, cos_col3 = st.columns([2, 2, 3])
@@ -753,8 +794,8 @@ else:
                              index=default_w2, key="cos_w2")
 
     if word1 and word2:
-        v1 = model.get_embedding(tokenizer.vocab[word1])
-        v2 = model.get_embedding(tokenizer.vocab[word2])
+        v1 = model.get_embedding(tokenizer.vocab[_to_raw(word1)])
+        v2 = model.get_embedding(tokenizer.vocab[_to_raw(word2)])
         sim = cosine_similarity(v1, v2)
 
         with cos_col3:

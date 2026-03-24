@@ -117,6 +117,19 @@ TRANSLATIONS = {
             "the moon glows high\n"
             "the wind blows cold"
         ),
+        "sec1_default_sentences_bpe": (
+            "understanding deep learning transformers\n"
+            "neural network training and optimization\n"
+            "tokenization splits text into subwords\n"
+            "embedding vectors represent word meaning\n"
+            "language models predict the next token\n"
+            "backpropagation updates model parameters\n"
+            "attention mechanisms process sequences\n"
+            "preprocessing normalizes the input data\n"
+            "unsupervised pretraining of representations\n"
+            "reconstruction and generation of text"
+        ),
+        "sec3_default_query_bpe": "tokenization",
         "sec1_btn_tokenize": "🔍 Analyse Dataset",
         "sec1_vocab_title": "📚 Built vocabulary",
         "sec1_vocab_info": (
@@ -402,6 +415,19 @@ TRANSLATIONS = {
             "la luna brilla alta\n"
             "il vento soffia freddo"
         ),
+        "sec1_default_sentences_bpe": (
+            "comprensione dell apprendimento profondo\n"
+            "addestramento di reti neurali e ottimizzazione\n"
+            "la tokenizzazione suddivide il testo in sottounità\n"
+            "vettori di embedding rappresentano il significato\n"
+            "i modelli linguistici predicono il prossimo token\n"
+            "la retropropagazione aggiorna i parametri\n"
+            "i meccanismi di attenzione elaborano sequenze\n"
+            "la preprocessazione normalizza i dati di input\n"
+            "apprendimento non supervisionato delle rappresentazioni\n"
+            "ricostruzione e generazione del testo"
+        ),
+        "sec3_default_query_bpe": "tokenizzazione",
         "sec1_btn_tokenize": "🔍 Analizza Dataset",
         "sec1_vocab_title": "📚 Vocabolario costruito",
         "sec1_vocab_info": (
@@ -671,6 +697,19 @@ TRANSLATIONS = {
             "la lune brille haute\n"
             "le vent souffle froid"
         ),
+        "sec1_default_sentences_bpe": (
+            "comprendre apprentissage profond transformateurs\n"
+            "entrainement reseau neuronal et optimisation\n"
+            "la tokenisation divise texte en sous mots\n"
+            "vecteurs embedding representent signification\n"
+            "modeles langage predisent prochain token\n"
+            "retropropagation met a jour parametres modele\n"
+            "mecanismes attention traitent les sequences\n"
+            "preprocessing normalise donnees entree\n"
+            "preentrainement non supervise representations\n"
+            "reconstruction et generation de texte"
+        ),
+        "sec3_default_query_bpe": "tokenisation",
         "sec1_btn_tokenize": "🔍 Analyser le jeu de données",
         "sec1_vocab_title": "📚 Vocabulaire construit",
         "sec1_vocab_info": "Chaque mot unique devient un <b>token</b> avec un index unique.",
@@ -870,6 +909,19 @@ TRANSLATIONS = {
             "der Mond leuchtet hoch\n"
             "der Wind weht kalt"
         ),
+        "sec1_default_sentences_bpe": (
+            "verstaendnis tiefes lernen transformatoren\n"
+            "neuronales netzwerk training und optimierung\n"
+            "tokenisierung teilt text in teilwoerter\n"
+            "einbettungsvektoren repraesentieren wortbedeutung\n"
+            "sprachmodelle sagen naechstes token vorher\n"
+            "backpropagation aktualisiert modellparameter\n"
+            "aufmerksamkeitsmechanismen verarbeiten sequenzen\n"
+            "vorverarbeitung normalisiert eingabedaten\n"
+            "unueberwachtes vortraining von repraesentationen\n"
+            "rekonstruktion und generierung von text"
+        ),
+        "sec3_default_query_bpe": "tokenisierung",
         "sec1_btn_tokenize": "🔍 Datensatz analysieren",
         "sec1_vocab_title": "📚 Erstelltes Vokabular",
         "sec1_vocab_info": "Jedes eindeutige Wort wird zu einem <b>Token</b> mit einem eindeutigen Index.",
@@ -1067,6 +1119,19 @@ TRANSLATIONS = {
             "la luna brilla alta\n"
             "el viento sopla frio"
         ),
+        "sec1_default_sentences_bpe": (
+            "comprension aprendizaje profundo transformadores\n"
+            "entrenamiento red neuronal y optimizacion\n"
+            "tokenizacion divide texto en subpalabras\n"
+            "vectores embedding representan significado\n"
+            "modelos lenguaje predicen siguiente token\n"
+            "retropropagacion actualiza parametros modelo\n"
+            "mecanismos atencion procesan secuencias\n"
+            "preprocesamiento normaliza datos entrada\n"
+            "preentrenamiento no supervisado representaciones\n"
+            "reconstruccion y generacion de texto"
+        ),
+        "sec3_default_query_bpe": "tokenizacion",
         "sec1_btn_tokenize": "🔍 Analizar Dataset",
         "sec1_vocab_title": "📚 Vocabulario construido",
         "sec1_vocab_info": "Cada palabra única se convierte en un <b>token</b> con un índice único.",
@@ -1257,6 +1322,19 @@ TRANSLATIONS = {
             "月亮 高高 发光\n"
             "风 吹 寒冷"
         ),
+        "sec1_default_sentences_bpe": (
+            "deep learning transformer architecture\n"
+            "neural network training and optimization\n"
+            "tokenization splits text into subwords\n"
+            "embedding vectors represent word meaning\n"
+            "language models predict the next token\n"
+            "backpropagation updates model parameters\n"
+            "attention mechanisms process sequences\n"
+            "preprocessing normalizes the input data\n"
+            "unsupervised pretraining of representations\n"
+            "reconstruction and generation of text"
+        ),
+        "sec3_default_query_bpe": "tokenization",
         "sec1_btn_tokenize": "🔍 分析数据集",
         "sec1_vocab_title": "📚 构建的词汇表",
         "sec1_vocab_info": "每个唯一的词成为一个<b>token</b>，具有唯一的索引。",
@@ -1449,6 +1527,19 @@ TRANSLATIONS = {
             "луна светит высоко\n"
             "ветер дует холодно"
         ),
+        "sec1_default_sentences_bpe": (
+            "понимание глубокого обучения трансформеров\n"
+            "обучение нейронных сетей и оптимизация\n"
+            "токенизация разбивает текст на подслова\n"
+            "векторы вложений представляют значение слова\n"
+            "языковые модели предсказывают следующий токен\n"
+            "обратное распространение обновляет параметры\n"
+            "механизмы внимания обрабатывают последовательности\n"
+            "предобработка нормализует входные данные\n"
+            "ненаблюдаемое предобучение представлений\n"
+            "реконструкция и генерация текста"
+        ),
+        "sec3_default_query_bpe": "токенизация",
         "sec1_btn_tokenize": "🔍 Анализировать датасет",
         "sec1_vocab_title": "📚 Построенный словарь",
         "sec1_vocab_info": "Каждое уникальное слово становится <b>токеном</b> с уникальным индексом.",
