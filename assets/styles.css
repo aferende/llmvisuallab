@@ -3,6 +3,27 @@
    Dark educational UI: modern, clean, readable
    ============================================================ */
 
+/* ---- Country flag emoji polyfill (Windows/Chrome) ----
+   unicode-range limits activation to Regional Indicator chars only.
+   This font is downloaded ONLY if the page contains flag sequences,
+   and replaces only those characters — all other text is unaffected. */
+@font-face {
+    font-family: 'TwemojiFlags';
+    unicode-range: U+1F1E0-1F1FF;
+    src: url('https://cdn.jsdelivr.net/npm/country-flag-emoji-polyfill@0.1/dist/twemoji-country-flags.woff2')
+         format('woff2');
+    font-display: swap;
+}
+
+/* Apply flag font to selectbox options (closed state + open dropdown portal) */
+[data-testid="stSelectbox"] *,
+[data-baseweb="select"] *,
+[data-baseweb="popover"] li,
+[role="option"] {
+    font-family: 'TwemojiFlags', 'Segoe UI Emoji', 'Apple Color Emoji',
+                 'Noto Color Emoji', sans-serif;
+}
+
 /* ---- Global ---- */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(135deg, #0a0c1a 0%, #0f1225 50%, #0a0c1a 100%);

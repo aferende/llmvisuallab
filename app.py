@@ -59,26 +59,6 @@ def load_css() -> None:
 
 load_css()
 
-# Twemoji polyfill — renders flag emoji as images on Windows/Chrome
-# (Windows system fonts lack country flag emoji; Twemoji provides them as SVGs)
-# No MutationObserver: it triggers during React reconciliation causing removeChild
-# errors. Simple delayed calls are enough — Streamlit re-runs this on every rerun.
-components.html("""
-<script src="https://unpkg.com/twemoji@14.0.2/dist/twemoji.min.js"
-        crossorigin="anonymous"></script>
-<script>
-(function(){
-  var _opts={folder:'svg',ext:'.svg',
-    base:'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/'};
-  function _do(){
-    try{twemoji.parse(window.parent.document.body,_opts);}catch(e){}
-  }
-  setTimeout(_do, 700);
-  setTimeout(_do, 2500);
-})();
-</script>
-""", height=0, scrolling=False)
-
 
 # ======================================================================
 # Session state initialisation
